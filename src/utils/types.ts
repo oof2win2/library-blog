@@ -1,5 +1,6 @@
 import { User } from "@prisma/client";
 import { NextApiRequest } from "next";
+import { SessionData } from "./validators";
 // import { SessionDataType } from "./validators"
 
 export type ApiError = {
@@ -28,8 +29,7 @@ type ApiRequestExtensions<Query, Body> = {
     }
   | {
       populated: true;
-      //   sessionData: SessionDataType
-      sessionData: null;
+      sessionData: SessionData;
       user: User;
     }
 );

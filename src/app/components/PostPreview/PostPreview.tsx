@@ -1,7 +1,7 @@
-import { Post } from "@prisma/client";
+import { Review } from "@prisma/client";
 import { Card, CardHeader, CardBody, CardFooter, Text } from "@chakra-ui/react";
 
-const PostPreview = ({ post }: { post: Post }) => {
+const PostPreview = ({ post }: { post: Review }) => {
   return (
     <Card>
       <CardBody>

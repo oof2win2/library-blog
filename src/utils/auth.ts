@@ -11,9 +11,8 @@ const JWT_SECRET = Buffer.from(ENV.JWT_SECRET);
  * Get session
  */
 export async function getSessionData(
-  cookies: Record<string, string>
+  cookie: string | undefined
 ): Promise<null | SessionData> {
-  const cookie = cookies[ENV.COOKIE_NAME];
   if (!cookie) return null;
   if (!cookie.startsWith("Bearer ")) return null;
 
