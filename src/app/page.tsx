@@ -11,17 +11,17 @@ export default function Home() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("/api/reviews/9780060963101/62")
+    fetch("/api/reviews/9780128098356/92")
       .then((res) => res.json())
-      .then((data) => {
-        setReview(data.review);
+      .then((res) => {
+        setReview(res.data.review);
         setLoading(false);
       })
       .catch((err) => {
         setError(err.message);
         setLoading(false);
       });
-  });
+  }, []);
 
   return (
     <main>
