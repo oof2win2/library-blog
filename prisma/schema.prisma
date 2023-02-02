@@ -1,44 +1,46 @@
 datasource db {
-    provider     = "mysql"
-    url          = env("DATABASE_URL")
-    relationMode = "prisma"
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 model Review {
-    id              Int      @id @default(autoincrement())
-    isbn            String   @db.VarChar(13)
-    title           String   @db.VarChar(255)
-    reviewPublished Boolean  @default(false)
-    publishedYear   Int?
-    publisher       String?
-    authors         String?
-    smallThumbnail  String?
-    largeThumbnail  String?
-    reviewAuthor    User     @relation(fields: [reviewAuthorId], references: [id])
-    reviewAuthorId  Int      @map("authorId")
-    createdAt       DateTime @default(now())
-    updatedAt       DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  isbn            String   @db.VarChar(13) // must be stored as varchar, as int is too small
+  title           String   @db.VarChar(255)
+  reviewPublished Boolean  @default(false)
+  publishedYear   Int?
+  publisher       String?
+  authors         String?
+  smallThumbnail  String?
+  largeThumbnail  String?
+  reviewAuthor    User     @relation(fields: [reviewAuthorId], references: [id])
+  reviewAuthorId  Int      @map("authorId")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([isbn, reviewAuthorId]) // isbn and reviewAuthorId must be unique together
 }
 
 model User {
-    id       Int      @id @default(autoincrement())
-    email    String   @unique
-    password String // password bcrypt hash
-    name     String?
-    posts    Review[]
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  password String // password bcrypt hash
+  name     String?
+  reviews  Review[]
 }
 
 model Session {
-    // ID of the JWT
-    jti String @id @default(uuid())
-    // UNIX timestamp (seconds) of issuing
-    iat Int
-    // UNIX timestamp (seconds) of expiry
-    exp Int
-    // ID of the user it is issued to
-    aud Int
+  // ID of the JWT
+  jti String @id @default(uuid())
+  // UNIX timestamp (seconds) of issuing
+  iat Int
+  // UNIX timestamp (seconds) of expiry
+  exp Int
+  // ID of the user it is issued to
+  aud Int
 }

@@ -2,27 +2,30 @@ import { validate } from "@/middleware/apiValidation";
 import { ApiRequest, ApiResponse, PopulatedApiRequest } from "@/utils/types";
 import { NextApiResponse } from "next";
 import nc from "next-connect";
-import { GET_Base_query, GET_ISBN_UserId_params } from "./index.types";
+import { GET_ISBN_UserId_params } from "../index.types";
 import { db } from "@/utils/db";
 
 const handler = nc<ApiRequest, NextApiResponse>();
 
-// GET /api/reviews
-handler.get<ApiRequest<GET_Base_query>>(
-  validate({ query: GET_Base_query }),
+// GET /api/reviews/:isbn/:userId
+handler.get<ApiRequest<GET_ISBN_UserId_params>>(
+  validate({ query: GET_ISBN_UserId_params }),
   async (req, res) => {
-    const { page, amountPerPage } = req.query;
+    const { isbn, reviewAuthorId } = req.query;
 
-    const reviews = await db.review.findMany({
-      skip: page * amountPerPage,
-      take: amountPerPage,
+    const review = await db.review.findUnique({
+      where: {
+        isbn_reviewAuthorId: {
+          isbn: isbn.toString(),
+          reviewAuthorId,
+        },
+      },
     });
 
     return res.status(200).json({
       status: "success",
       data: {
-        length: reviews.length,
-        reviews,
+        review,
       },
     });
   }
