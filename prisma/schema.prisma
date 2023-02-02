@@ -9,19 +9,23 @@ generator client {
 }
 
 model Post {
-    isbn      String   @id @db.VarChar(13)
-    title     String   @db.VarChar(255)
-    published Boolean  @default(false)
-    filepath  String
-    author    User     @relation(fields: [authorId], references: [id])
-    authorId  Int
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id            Int      @id @default(autoincrement())
+    isbn          String   @db.VarChar(13)
+    title         String   @db.VarChar(255)
+    postPublished Boolean  @default(false)
+    publishedYear Int?
+    publisher     String?
+    authors       String?
+    postAuthor    User     @relation(fields: [postAuthorId], references: [id])
+    postAuthorId  Int      @map("authorId")
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
 }
 
 model User {
-    id    Int     @id @default(autoincrement())
-    email String  @unique
-    name  String?
-    posts Post[]
+    id       Int     @id @default(autoincrement())
+    email    String  @unique
+    password String // password bcrypt hash
+    name     String?
+    posts    Post[]
 }
