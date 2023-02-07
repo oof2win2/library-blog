@@ -1,33 +1,16 @@
 "use client";
-import { Center } from "@chakra-ui/react";
+import { Center, Container } from "@chakra-ui/react";
 import { Review } from "@prisma/client";
 import { useEffect, useState } from "react";
 import ReviewPreview from "./components/ReviewPreview/ReviewPreview";
+import ReviewRow from "./components/ReviewRow/ReviewRow";
 
 export default function Home() {
-  const [review, setReview] = useState<Review | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setLoading(true);
-    fetch("/api/reviews/9780128098356/92")
-      .then((res) => res.json())
-      .then((res) => {
-        setReview(res.data.review);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
-
   return (
     <main>
-      <Center>
-        <ReviewPreview review={review} error={error} loading={loading} />
-      </Center>
+      <Container maxW="160ch">
+        <ReviewRow length={20} />
+      </Container>
     </main>
   );
 }

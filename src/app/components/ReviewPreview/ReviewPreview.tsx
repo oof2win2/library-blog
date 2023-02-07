@@ -32,7 +32,7 @@ const ReviewPreview = ({ review, loading, error }: Props) => {
     );
   }
   return (
-    <Card maxW="96">
+    <Card maxW="96" minW="96">
       <CardBody>
         <Stack divider={<StackDivider />} spacing="4">
           <Box>
@@ -60,7 +60,7 @@ const ReviewPreview = ({ review, loading, error }: Props) => {
               />
             )}
           </Center>
-          <CardFooter>ISBN {review?.isbn || "Unknown"}</CardFooter>
+          {/* <CardFooter>ISBN {review?.isbn || "Unknown"}</CardFooter> */}
         </Stack>
       </CardBody>
     </Card>
