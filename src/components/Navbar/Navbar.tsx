@@ -22,14 +22,18 @@ const Navbar = () => {
             {isDesktop ? (
               <Flex justify="space-between" flex="1">
                 <ButtonGroup variant="link" spacing="8">
-                  {/* <Link href="/">
-                    <Button>Reviews</Button>
-                  </Link> */}
-                  {["Reviews", "Pricing", "Resources", "Support"].map(
-                    (item) => (
-                      <Button key={item}>{item}</Button>
-                    )
-                  )}
+                  <Button>
+                    <Link href="/">Home</Link>
+                  </Button>
+                  <Button>
+                    <Link href="/reviews">Reviews</Link>
+                  </Button>
+                  <Button>
+                    <Link href="/pricing">Pricing</Link>
+                  </Button>
+                  <Button>
+                    <Link href="/resources">Resources</Link>
+                  </Button>
                 </ButtonGroup>
                 <HStack spacing="3">
                   <Button variant="ghost">Sign in</Button>
