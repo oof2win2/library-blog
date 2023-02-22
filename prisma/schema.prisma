@@ -23,15 +23,17 @@ model Book {
 }
 
 model Review {
-  id              Int      @id @default(autoincrement())
-  isbn            String   @db.Char(13) // must be stored as varchar, as int is too small
-  reviewPublished Boolean  @default(false)
-  reviewAuthor    User     @relation(fields: [reviewAuthorId], references: [id])
+  id              Int     @id @default(autoincrement())
+  isbn            String  @db.Char(13) // must be stored as varchar, as int is too small
+  reviewPublished Boolean @default(false)
+  reviewAuthor    User    @relation(fields: [reviewAuthorId], references: [id])
   reviewAuthorId  Int
-  reviewText      String   @db.Text() // stored as text as to not be in memory
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  Book            Book?    @relation(fields: [isbn], references: [isbn])
+  reviewText      String  @db.Text() // stored as text as to not be in memory
+  rating          Int // the 1-5 star rating of the book
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Book      Book?    @relation(fields: [isbn], references: [isbn])
 
   @@unique([isbn, reviewAuthorId]) // isbn and reviewAuthorId must be unique together
   @@index([reviewAuthorId])

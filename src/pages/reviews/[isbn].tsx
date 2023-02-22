@@ -18,6 +18,7 @@ import { Book, Review, User } from "@prisma/client";
 import NextImage from "next/image";
 import { useState } from "react";
 import ReviewComponent from "@/components/Review/Review";
+import StarRating from "@/components/StarRating";
 
 interface BookData {
   isbn: number;
@@ -92,6 +93,10 @@ export default function BookPage({
         <Heading>Book not found</Heading>
       </Container>
     );
+  const averageRating =
+    reviews.reduce((acc, review) => {
+      return acc + review.rating;
+    }, 0) / reviews.length;
   return (
     <Container maxW="80ch">
       <HStack divider={<StackDivider />} spacing="4" paddingBottom="4">
@@ -109,7 +114,7 @@ export default function BookPage({
             style={{ objectFit: "contain" }}
           />
         </Center>
-        <Box>
+        <Box alignSelf="start">
           <Heading>{book.title}</Heading>
           <Heading>{book.subtitle}</Heading>
 
@@ -117,6 +122,8 @@ export default function BookPage({
           <Text>
             Published: {book.publishedYear}, {book.publisher}
           </Text>
+          <Divider />
+          <StarRating rating={averageRating} />
         </Box>
       </HStack>
       <Divider />
@@ -126,7 +133,7 @@ export default function BookPage({
             (author) => author.id === review.reviewAuthorId
           )!;
           return (
-            <StackItem key={review.isbn}>
+            <StackItem key={author.id}>
               <ReviewComponent review={review} author={author} />
             </StackItem>
           );

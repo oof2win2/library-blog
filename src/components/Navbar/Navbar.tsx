@@ -9,7 +9,7 @@ import {
   useBreakpointValue,
 } from "@chakra-ui/react";
 import Link from "next/link";
-import { FiMenu } from "react-icons/fi";
+import { IoMenu } from "react-icons/io5";
 
 const Navbar = () => {
   const isDesktop = useBreakpointValue({ base: false, lg: true });
@@ -45,7 +45,7 @@ const Navbar = () => {
             ) : (
               <IconButton
                 variant="ghost"
-                icon={<FiMenu fontSize="1.25rem" />}
+                icon={<IoMenu fontSize="1.25rem" />}
                 aria-label="Open Menu"
               />
             )}

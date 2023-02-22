@@ -7,6 +7,7 @@ import {
   useMediaQuery,
 } from "@chakra-ui/react";
 import { Review, User } from "@prisma/client";
+import StarRating from "@/components/StarRating";
 
 export default function ReviewComponent({
   review,
@@ -27,6 +28,7 @@ export default function ReviewComponent({
           <Box>
             <Text>{author.name}</Text>
             <Text>{author.reviewAmount} reviews</Text>
+            <StarRating rating={review.rating} />
           </Box>
         </StackItem>
         <Box>
