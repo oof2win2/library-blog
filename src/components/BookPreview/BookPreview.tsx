@@ -1,5 +1,5 @@
 "use client";
-import { Review } from "@prisma/client";
+import { Book, Review } from "@prisma/client";
 import {
   Card,
   CardHeader,
@@ -16,12 +16,12 @@ import {
 } from "@chakra-ui/react";
 import Image from "next/image";
 export type Props = {
-  review: Review | null;
+  book: Book | null;
   loading: boolean;
   error: string | null;
 };
-const ReviewPreview = ({ review, loading, error }: Props) => {
-  console.log(review);
+const ReviewPreview = ({ book, loading, error }: Props) => {
+  console.log(book);
   if (error) {
     return (
       <Card maxW="96">
@@ -36,8 +36,8 @@ const ReviewPreview = ({ review, loading, error }: Props) => {
       <CardBody>
         <Stack divider={<StackDivider />} spacing="4">
           <Box>
-            {loading ? <SkeletonText /> : <Text>{review?.title}</Text>}
-            {loading ? <SkeletonText /> : <Text>{review?.authors}</Text>}
+            {loading ? <SkeletonText /> : <Text>{book?.title}</Text>}
+            {loading ? <SkeletonText /> : <Text>{book?.authors}</Text>}
           </Box>
           <Center
             style={{
@@ -51,9 +51,7 @@ const ReviewPreview = ({ review, loading, error }: Props) => {
               <Skeleton />
             ) : (
               <Image
-                src={
-                  review && review.largeThumbnail ? review.largeThumbnail : ""
-                }
+                src={book && book.largeThumbnail ? book.largeThumbnail : ""}
                 alt={`Book cover`}
                 fill
                 style={{ objectFit: "contain" }}

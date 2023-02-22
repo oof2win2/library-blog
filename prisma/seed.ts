@@ -7,12 +7,14 @@ import bcrypt from "bcryptjs";
 import got from "got";
 
 const config = {
-  users: 10,
+  users: 15,
   reviews: {
-    minPerUser: 5,
+    minPerUser: 15,
     maxPerUser: 25,
   },
 };
+
+const userPasswords = ["password", "qwerty"];
 
 const prisma = new PrismaClient();
 const run = async () => {
@@ -20,18 +22,16 @@ const run = async () => {
 
   await prisma.review.deleteMany();
   await prisma.user.deleteMany();
-
-  await fs.rm("./posts", { recursive: true, force: true });
-  await fs.mkdir("./posts");
+  await prisma.book.deleteMany();
 
   // create users
   const userIDs: number[] = [];
   for (let i = 0; i < config.users; i++) {
     const user = await prisma.user.create({
       data: {
-        name: faker.name.firstName(),
+        name: faker.name.fullName(),
         email: faker.internet.email(),
-        password: bcrypt.hashSync(faker.internet.password()),
+        password: bcrypt.hashSync(userPasswords[i % userPasswords.length]),
       },
     });
     userIDs.push(user.id);
@@ -39,7 +39,7 @@ const run = async () => {
 
   // fetch 100 books and create reviews for them
   const books: GoogleBooksAPIVolume[] = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 1; i++) {
     const response = await got
       .get(
         `https://www.googleapis.com/books/v1/volumes?q=quantum&startIndex=${
@@ -48,6 +48,28 @@ const run = async () => {
       )
       .json<GoogleBooksAPIVolumeListResponse>();
     books.push(...response.items);
+  }
+
+  // create book objects for each book
+  for (const book of books) {
+    const isbn = book.volumeInfo.industryIdentifiers.find(
+      (x) => x.type === "ISBN_13"
+    )?.identifier;
+    if (!isbn) continue;
+    await prisma.book.create({
+      data: {
+        isbn: isbn,
+        title: book.volumeInfo.title,
+        subtitle: book.volumeInfo.subtitle || null,
+        publisher: book.volumeInfo.publisher || null,
+        publishedYear: book.volumeInfo.publishedDate
+          ? new Date(book.volumeInfo.publishedDate).getFullYear()
+          : -1,
+        authors: book.volumeInfo.authors?.join(";"),
+        smallThumbnail: book.volumeInfo.imageLinks?.smallThumbnail || null,
+        largeThumbnail: book.volumeInfo.imageLinks?.thumbnail || null,
+      },
+    });
   }
 
   // create posts for each user
@@ -63,36 +85,28 @@ const run = async () => {
     });
     const booksToReview = books.slice(startIndex, startIndex + amountOfPosts);
 
+    let reviewsByUser = 0;
     for (const book of booksToReview) {
       const isbn = book.volumeInfo.industryIdentifiers.find(
         (x) => x.type === "ISBN_13"
       )?.identifier;
       if (!isbn) continue;
-      const post = await prisma.review.create({
+      await prisma.review.create({
         data: {
           isbn: isbn,
-          title: book.volumeInfo.title,
           reviewPublished: true,
-          publishedYear: book.volumeInfo.publishedDate
-            ? new Date(book.volumeInfo.publishedDate).getFullYear()
-            : -1,
-          publisher: book.volumeInfo.publisher || null,
-          authors: book.volumeInfo.authors?.join(";"),
           reviewAuthorId: userID,
-          smallThumbnail: book.volumeInfo.imageLinks?.smallThumbnail || null,
-          largeThumbnail: book.volumeInfo.imageLinks?.thumbnail || null,
+          reviewText: faker.lorem.paragraphs(),
         },
       });
-      const postContent = `---\nisbn: ${isbn}\ntitle: "${post.title.replaceAll(
-        '"',
-        '"'
-      )}"\nauthor: "${post.authors?.replaceAll('"', '"')}"
-      \npublished: ${
-        post.publishedYear
-      }\npublisher: "${post.publisher?.replaceAll('"', '"')}"
-      \n---\n\n${faker.lorem.paragraphs().replaceAll("\n", "\n\n")}`;
-      await fs.writeFile(`./posts/${isbn}_${userID}.md`, postContent);
+      reviewsByUser++;
     }
+    await prisma.user.update({
+      where: { id: userID },
+      data: {
+        reviewAmount: reviewsByUser,
+      },
+    });
   }
 };
 

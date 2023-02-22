@@ -1,20 +1,20 @@
 import { Box, Flex, Grid, GridItem, HStack, Stack } from "@chakra-ui/react";
-import { Review } from "@prisma/client";
+import { Book, Review } from "@prisma/client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import ReviewPreview from "../ReviewPreview/ReviewPreview";
+import BookPreview from "../BookPreview/BookPreview";
 
 const ReviewRow = ({ length }: { length: number }) => {
-  const [reviews, setReviews] = useState<Review[]>();
+  const [books, setBooks] = useState<Book[]>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/reviews?reviewsPerPage=${length}`)
+    fetch(`/api/books?booksPerPage=${length}`)
       .then((res) => res.json())
       .then((res) => {
-        setReviews(res.data.reviews);
+        setBooks(res.data.books);
         setLoading(false);
         setError(null);
       })
@@ -26,11 +26,11 @@ const ReviewRow = ({ length }: { length: number }) => {
 
   return (
     <Flex justify="center" wrap="wrap" gap="8px">
-      {reviews?.map((review, index) => {
+      {books?.map((book, index) => {
         return (
           <Box padding="4">
-            <Link href={`/reviews/${review.isbn}/${review.reviewAuthorId}`}>
-              <ReviewPreview review={review} loading={loading} error={null} />
+            <Link href={`/reviews/${book.isbn}`}>
+              <BookPreview book={book} loading={loading} error={null} />
             </Link>
           </Box>
         );

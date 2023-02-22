@@ -1,5 +1,4 @@
 .env
-posts/
 # dependencies
 /node_modules
 .yarn

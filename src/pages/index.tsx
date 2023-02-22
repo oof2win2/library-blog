@@ -1,5 +1,5 @@
 import { Center, Container } from "@chakra-ui/react";
-import ReviewRow from "../components/ReviewRow/ReviewRow";
+import ReviewRow from "../components/BookRow/BookRow";
 
 export default function Home() {
   return (

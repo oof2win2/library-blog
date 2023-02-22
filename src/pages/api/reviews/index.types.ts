@@ -24,6 +24,23 @@ export const GET_Base_query = z.object({
 });
 export type GET_Base_query = z.infer<typeof GET_Base_query>;
 
+export const GET_ISBN_params = z.object({
+  isbn: z
+    .string()
+    .length(13)
+    .transform((v, ctx) => {
+      const num = parseInt(v);
+      if (Number.isNaN(num)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "ISBN must be a number",
+        });
+      }
+      return num;
+    }),
+});
+export type GET_ISBN_params = z.infer<typeof GET_ISBN_params>;
+
 export const GET_ISBN_UserId_params = z.object({
   isbn: z
     .string()

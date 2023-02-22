@@ -8,30 +8,42 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Book {
+  isbn           String   @id @db.Char(13) // must be stored as varchar, as int is too small
+  title          String
+  subtitle       String?
+  publishedYear  Int?
+  publisher      String?
+  authors        String?  @db.Text() // stored as text as it can be a long list of authors
+  smallThumbnail String?
+  largeThumbnail String?
+  reviewCount    Int      @default(0)
+  reviewAverage  Float    @default(0)
+  reviews        Review[]
+}
+
 model Review {
   id              Int      @id @default(autoincrement())
-  isbn            String   @db.VarChar(13) // must be stored as varchar, as int is too small
-  title           String   @db.VarChar(255)
+  isbn            String   @db.Char(13) // must be stored as varchar, as int is too small
   reviewPublished Boolean  @default(false)
-  publishedYear   Int?
-  publisher       String?
-  authors         String?
-  smallThumbnail  String?
-  largeThumbnail  String?
   reviewAuthor    User     @relation(fields: [reviewAuthorId], references: [id])
-  reviewAuthorId  Int      @map("authorId")
+  reviewAuthorId  Int
+  reviewText      String   @db.Text() // stored as text as to not be in memory
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  Book            Book?    @relation(fields: [isbn], references: [isbn])
 
   @@unique([isbn, reviewAuthorId]) // isbn and reviewAuthorId must be unique together
+  @@index([reviewAuthorId])
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
-  email    String   @unique
-  password String // password bcrypt hash
-  name     String?
-  reviews  Review[]
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  password     String // password bcrypt hash
+  name         String?
+  reviewAmount Int      @default(0)
+  reviews      Review[]
 }
 
 model Session {
