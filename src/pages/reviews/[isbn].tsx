@@ -122,11 +122,11 @@ export default function BookPage({
           <Text>
             Published: {book.publishedYear}, {book.publisher}
           </Text>
-          <Divider />
+          <Divider m={2} />
           <StarRating rating={averageRating} />
         </Box>
       </HStack>
-      <Divider />
+      <Divider m={2} />
       <Stack spacing="4">
         {reviews.map((review) => {
           const author = authors.find(
