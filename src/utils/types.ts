@@ -19,9 +19,10 @@ export type ApiResponse<D> =
       errors: ApiError[];
     };
 
-type ApiRequestExtensions<Query> = {
+type ApiRequestExtensions<Query, Body> = {
   populated: boolean;
   query: Query;
+  body: Body;
 } & (
   | {
       populated: false;
@@ -36,12 +37,14 @@ type ApiRequestExtensions<Query> = {
 export type ApiRequest<
   Query = Partial<{
     [key: string]: string | string[];
-  }>
-> = NextApiRequest & ApiRequestExtensions<Query>;
+  }>,
+  Body = any
+> = NextApiRequest & ApiRequestExtensions<Query, Body>;
 export type PopulatedApiRequest<
   Query = Partial<{
     [key: string]: string | string[];
-  }>
-> = ApiRequest<Query> & {
+  }>,
+  Body = any
+> = ApiRequest<Query, Body> & {
   populated: true;
 };
