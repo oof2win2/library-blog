@@ -1,2 +1,2 @@
-export * from "./dbTypes";
-export * from "./sessionData";
+export * from "./dbTypes"
+export * from "./sessionData"
