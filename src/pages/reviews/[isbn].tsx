@@ -106,10 +106,14 @@ export default function BookPage({
 	// we need to ensure that if a user is logged in and they posted a review, that review is at the top of the list
 	// so we sort the reviews by the reviewAuthorId, and if the user is logged in, we put the user's review at the top
 	reviews = reviews.sort((a, b) => {
-		if (user && user.id === a.reviewAuthorId) return -1
-		if (user && user.id === b.reviewAuthorId) return -1
-		return 1
+		console.log(user?.id, a.reviewAuthorId, b.reviewAuthorId)
+		if (user && user?.id === a.reviewAuthorId) return 1
+		if (user && user?.id === b.reviewAuthorId) return 1
+		return -1
 	})
+	const userHasReview = reviews.some(
+		(review) => user && user.id === review.reviewAuthorId
+	)
 
 	return (
 		<Container maxW="80ch">
@@ -146,6 +150,8 @@ export default function BookPage({
 			</HStack>
 			<Divider m={2} />
 			<Stack spacing="4">
+				{/* TODO: add review creation form */}
+				{!userHasReview && <StackItem>Potatoes!</StackItem>}
 				{reviews.map((review) => {
 					const author = authors.find(
 						(author) => author.id === review.reviewAuthorId

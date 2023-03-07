@@ -41,29 +41,9 @@ export const GET_ISBN_params = z.object({
 })
 export type GET_ISBN_params = z.infer<typeof GET_ISBN_params>
 
-export const GET_ISBN_UserId_params = z.object({
-	isbn: z
-		.string()
-		.length(13)
-		.transform((v, ctx) => {
-			const num = parseInt(v)
-			if (Number.isNaN(num)) {
-				ctx.addIssue({
-					code: z.ZodIssueCode.custom,
-					message: "ISBN must be a number",
-				})
-			}
-			return num
-		}),
-	reviewAuthorId: z.string().transform((v, ctx) => {
-		const num = parseInt(v)
-		if (Number.isNaN(num)) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: "reviewAuthorId must be a number",
-			})
-		}
-		return num
-	}),
+export const POST_ISBN_body = z.object({
+	isbn: z.string().length(13),
+	rating: z.number().min(1).max(5),
+	review: z.string().min(1).max(1000),
 })
-export type GET_ISBN_UserId_params = z.infer<typeof GET_ISBN_UserId_params>
+export type POST_ISBN_body = z.infer<typeof POST_ISBN_body>

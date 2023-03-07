@@ -53,3 +53,13 @@ interface GoogleBooksAPIVolumeListResponse {
 	totalItems: number
 	items: GoogleBooksAPIVolume[]
 }
+
+type BaseAPIResponse<T> =
+	| {
+			status: "success"
+			data: T
+	  }
+	| {
+			status: "error"
+			[key: string]: any
+	  }

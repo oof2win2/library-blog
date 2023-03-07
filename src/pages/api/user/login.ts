@@ -27,6 +27,7 @@ handler.post<ApiRequest<{ Body: LoginFormType }>>(
 				status: "error",
 				errors: [
 					{
+						status: "error",
 						statusCode: 404,
 						message: "Email or password is wrong",
 						description: "Email or password is wrong",

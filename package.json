@@ -45,6 +45,7 @@
 		"remark": "^14.0.2",
 		"remark-html": "^15.0.1",
 		"superjson": "^1.12.2",
+		"swr": "^2.1.0",
 		"use-debounce": "^9.0.3",
 		"validator": "^13.7.0",
 		"zod": "^3.20.2",

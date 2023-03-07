@@ -18,7 +18,14 @@ import {
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons"
 import { Review, User } from "@prisma/client"
 import StarRating from "@/components/StarRating"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import useSWRMutation from "swr/mutation"
+
+async function DeleteReview(url: string, { arg }: { arg: string }) {
+	return fetch(`${url}/${arg}`, {
+		method: "DELETE",
+	}).then((res) => res.json())
+}
 
 export default function ReviewComponent({
 	review,
@@ -36,6 +43,20 @@ export default function ReviewComponent({
 	const [deleteWindow, setDeleteWindow] = useState(false)
 	const deleteCancelRef = useRef<HTMLButtonElement>(null)
 	const [editWindow, setEditWindow] = useState(false)
+	const {
+		trigger: deleteReview,
+		data: deleteReviewData,
+		error: deleteReviewError,
+	} = useSWRMutation("/api/reviews", DeleteReview)
+
+	// remove the review from the page when it's deleted
+	useEffect(() => {
+		if (deleteReviewData) {
+			if (deleteReviewData.status === "success") {
+				// TODO: propagate the change somehow
+			}
+		}
+	}, [deleteReviewData])
 
 	return (
 		<Card maxW="70ch" padding="4">
@@ -65,7 +86,10 @@ export default function ReviewComponent({
 							<Button
 								colorScheme="red"
 								// TODO: actual delete
-								onClick={() => setDeleteWindow(false)}
+								onClick={() => {
+									setDeleteWindow(false)
+									deleteReview(review.isbn)
+								}}
 								ml={3}
 							>
 								Delete

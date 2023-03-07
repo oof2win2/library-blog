@@ -45,6 +45,7 @@ export default function validate({
 		if (errors.length) {
 			// if there are errors, return a 422
 			return res.status(422).json({
+				status: "error",
 				statusCode: 422,
 				message: "Bad Request",
 				description: errors.flat(),

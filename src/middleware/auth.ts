@@ -16,6 +16,7 @@ export default async function authAPI(
 	const sessionData = await getSessionData(req.cookies[ENV.COOKIE_NAME])
 	if (!sessionData) {
 		return res.status(401).json({
+			status: "error",
 			statusCode: 401,
 			message: "Unauthorized",
 			description: "You must be logged in to access this resource.",
