@@ -18,6 +18,7 @@ import { Book, Review, User } from "@prisma/client"
 import NextImage from "next/image"
 import { useState } from "react"
 import ReviewComponent from "@/components/Review/Review"
+import CreateReviewComponent from "@/components/Review/CreateReview"
 import StarRating from "@/components/StarRating"
 import { useAppSelector } from "@/utils/redux/hooks"
 
@@ -117,7 +118,12 @@ export default function BookPage({
 
 	return (
 		<Container maxW="80ch">
-			<HStack divider={<StackDivider />} spacing="4" paddingBottom="4">
+			<Stack
+				divider={<StackDivider />}
+				spacing="4"
+				paddingBottom="4"
+				direction={["column", "row"]}
+			>
 				<Center
 					style={{
 						position: "relative",
@@ -147,11 +153,15 @@ export default function BookPage({
 					<Divider m={2} />
 					<StarRating rating={averageRating} />
 				</Box>
-			</HStack>
+			</Stack>
 			<Divider m={2} />
 			<Stack spacing="4">
 				{/* TODO: add review creation form */}
-				{!userHasReview && <StackItem>Potatoes!</StackItem>}
+				{!userHasReview && (
+					<StackItem>
+						<CreateReviewComponent isbn={book.isbn} />
+					</StackItem>
+				)}
 				{reviews.map((review) => {
 					const author = authors.find(
 						(author) => author.id === review.reviewAuthorId

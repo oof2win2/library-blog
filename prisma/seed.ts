@@ -104,6 +104,7 @@ const run = async () => {
 					reviewAuthorId: userID,
 					reviewText: faker.lorem.paragraphs(),
 					rating: faker.datatype.number({ min: 1, max: 5 }),
+					threeWords: faker.lorem.words(3),
 				},
 			})
 			reviewsByUser++

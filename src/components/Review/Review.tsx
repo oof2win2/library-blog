@@ -14,6 +14,7 @@ import {
 	Text,
 	Tooltip,
 	useMediaQuery,
+	Divider,
 } from "@chakra-ui/react"
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons"
 import { Review, User } from "@prisma/client"
@@ -98,6 +99,7 @@ export default function ReviewComponent({
 					</AlertDialogContent>
 				</AlertDialogOverlay>
 			</AlertDialog>
+
 			<Stack spacing="4" direction={isLargerThan800 ? "row" : "column"}>
 				<StackItem alignSelf="start" minW="12ch" maxW="12ch">
 					<Box>
@@ -130,6 +132,8 @@ export default function ReviewComponent({
 				</StackItem>
 				<Box>
 					<Text>{review.reviewText}</Text>
+					<Divider m={2} />
+					<Text>Three words: {review.threeWords}</Text>
 				</Box>
 			</Stack>
 		</Card>
