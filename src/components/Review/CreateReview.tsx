@@ -1,4 +1,5 @@
 import { useAppSelector } from "@/utils/redux/hooks"
+import { ReviewForm, ReviewFormType } from "@/utils/validators/ReviewForms"
 import {
 	Container,
 	Divider,
@@ -18,10 +19,15 @@ import {
 	Button,
 	Flex,
 	Input,
+	FormControl,
+	FormLabel,
+	FormErrorMessage,
 } from "@chakra-ui/react"
+import { useFormik } from "formik"
 import { useState } from "react"
-
+import { toFormikValidationSchema } from "zod-formik-adapter"
 import { IoStarOutline, IoStarHalf, IoStar } from "react-icons/io5"
+import { useDebouncedCallback } from "use-debounce"
 
 function StarRating({ onChange }: { onChange: (value: number) => void }) {
 	const [rating, setRating] = useState(5)
@@ -69,13 +75,59 @@ const CreateReview = ({ isbn }: CreateReviewParams) => {
 	})
 	const { user } = useAppSelector((state) => state.user)
 
+	const { setFieldValue, submitForm, errors } = useFormik<ReviewFormType>({
+		initialValues: {
+			reviewText: "",
+			threeWords: "",
+			rating: 5,
+			isbn: isbn,
+		},
+		validationSchema: toFormikValidationSchema(ReviewForm),
+		onSubmit: async (data) => {
+			// TODO: submit the form
+		},
+	})
+
+	const debouncedSetFieldValue = useDebouncedCallback(
+		(fieldName: string, fieldValue: string) => {
+			setFieldValue(fieldName, fieldValue)
+		},
+		100
+	)
+
 	if (!user) return null
 
 	return (
 		<Card maxW="70ch" padding="4">
 			<Stack spacing="4" direction="column">
-				<Textarea placeholder="Your review goes here" />
-				<Input placeholder="Your three words go here" />
+				<FormControl
+					isInvalid={Boolean(errors.reviewText)}
+					isRequired
+					variant="floating"
+				>
+					<FormLabel>Your review</FormLabel>
+					<Textarea
+						placeholder=""
+						onChange={(e) =>
+							debouncedSetFieldValue("reviewText", e.target.value)
+						}
+					/>
+					<FormErrorMessage>{errors.reviewText}</FormErrorMessage>
+				</FormControl>
+				<FormControl
+					isInvalid={Boolean(errors.reviewText)}
+					isRequired
+					variant="floating"
+				>
+					<FormLabel>Your three words to describe the book</FormLabel>
+					<Input
+						placeholder=""
+						onChange={(e) =>
+							debouncedSetFieldValue("threeWords", e.target.value)
+						}
+					/>
+					<FormErrorMessage>{errors.threeWords}</FormErrorMessage>
+				</FormControl>
 				{/* the stars, but editable */}
 				<Flex
 					w="100%"
