@@ -2,7 +2,7 @@ import { apiValidation, authAPI } from "@/middleware"
 import { ApiRequest, ApiResponse, PopulatedApiRequest } from "@/utils/types"
 import { NextApiResponse } from "next"
 import nc from "next-connect"
-import { GET_ISBN_params, POST_ISBN_body } from "./index.types"
+import { GET_ISBN_params, PUT_ISBN_body, PUT_ISBN_query } from "./index.types"
 import { db } from "@/utils/db"
 
 const handler = nc<ApiRequest, NextApiResponse>()
@@ -70,8 +70,8 @@ handler.delete<ApiRequest<{ Query: GET_ISBN_params }>>(
 )
 
 // POST /api/reviews/:isbn
-handler.post<ApiRequest<{ Body: POST_ISBN_body }>>(
-	apiValidation({ body: POST_ISBN_body }),
+handler.put<ApiRequest<{ Body: PUT_ISBN_body; Query: PUT_ISBN_query }>>(
+	apiValidation({ body: PUT_ISBN_body, query: PUT_ISBN_query }),
 	authAPI,
 	async (req, res) => {
 		if (!req.populated)
@@ -81,15 +81,16 @@ handler.post<ApiRequest<{ Body: POST_ISBN_body }>>(
 				message: "Internal Server Error",
 				description: "You are not logged in",
 			})
-		const body = req.body as POST_ISBN_body
+		const body = req.body as PUT_ISBN_body
 
 		const review = await db.review.create({
 			data: {
-				isbn: body.isbn,
+				isbn: req.query.isbn,
 				rating: body.rating,
-				reviewText: body.review,
+				reviewText: body.reviewText,
 				reviewPublished: true,
 				reviewAuthorId: req.user.id,
+				threeWords: body.threeWords,
 			},
 		})
 

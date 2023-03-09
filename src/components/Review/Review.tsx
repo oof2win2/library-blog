@@ -15,6 +15,7 @@ import {
 	Tooltip,
 	useMediaQuery,
 	Divider,
+	useToast,
 } from "@chakra-ui/react"
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons"
 import { Review, User } from "@prisma/client"
@@ -32,11 +33,14 @@ export default function ReviewComponent({
 	review,
 	author,
 	editable = false,
+	removeReview,
 }: {
 	review: Review
 	author: Omit<User, "email" | "password">
 	editable?: boolean
+	removeReview: (reviewAuthorId: number) => void
 }) {
+	const toast = useToast()
 	const [isLargerThan800] = useMediaQuery("(min-width: 800px)", {
 		ssr: true,
 		fallback: true, // return false on the server, and re-evaluate on the client side
@@ -54,7 +58,12 @@ export default function ReviewComponent({
 	useEffect(() => {
 		if (deleteReviewData) {
 			if (deleteReviewData.status === "success") {
-				// TODO: propagate the change somehow
+				toast({
+					title: "Review deleted",
+					status: "success",
+					isClosable: true,
+				})
+				removeReview(review.reviewAuthorId)
 			}
 		}
 	}, [deleteReviewData])

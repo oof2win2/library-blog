@@ -16,7 +16,7 @@ import {
 import { db } from "@/utils/db"
 import { Book, Review, User } from "@prisma/client"
 import NextImage from "next/image"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import ReviewComponent from "@/components/Review/Review"
 import CreateReviewComponent from "@/components/Review/CreateReview"
 import StarRating from "@/components/StarRating"
@@ -92,6 +92,8 @@ export default function BookPage({
 	authors: Omit<User, "email" | "password">[]
 }) {
 	const { user } = useAppSelector((state) => state.user)
+	const [finalReviews, setFinalReviews] = useState(reviews)
+	const [finalAuthors, setFinalAuthors] = useState(authors)
 
 	if (!book)
 		return (
@@ -100,19 +102,29 @@ export default function BookPage({
 			</Container>
 		)
 	const averageRating =
-		reviews.reduce((acc, review) => {
+		finalReviews.reduce((acc, review) => {
 			return acc + review.rating
-		}, 0) / reviews.length
+		}, 0) / finalReviews.length
+
+	const removeReview = (reviewAuthorId: number) => {
+		setFinalReviews(
+			finalReviews.filter((x) => x.reviewAuthorId !== reviewAuthorId)
+		)
+		setFinalAuthors(finalAuthors.filter((x) => x.id !== reviewAuthorId))
+	}
 
 	// we need to ensure that if a user is logged in and they posted a review, that review is at the top of the list
 	// so we sort the reviews by the reviewAuthorId, and if the user is logged in, we put the user's review at the top
-	reviews = reviews.sort((a, b) => {
-		console.log(user?.id, a.reviewAuthorId, b.reviewAuthorId)
-		if (user && user?.id === a.reviewAuthorId) return 1
-		if (user && user?.id === b.reviewAuthorId) return 1
-		return -1
-	})
-	const userHasReview = reviews.some(
+	useEffect(() => {
+		setFinalReviews(
+			finalReviews.sort((a, b) => {
+				if (user && user?.id === a.reviewAuthorId) return -1
+				if (user && user?.id === b.reviewAuthorId) return -1
+				return 1
+			})
+		)
+	}, [finalReviews])
+	const userHasReview = finalReviews.some(
 		(review) => user && user.id === review.reviewAuthorId
 	)
 
@@ -156,24 +168,30 @@ export default function BookPage({
 			</Stack>
 			<Divider m={2} />
 			<Stack spacing="4">
-				{/* TODO: add review creation form */}
 				{!userHasReview && (
 					<StackItem>
-						<CreateReviewComponent isbn={book.isbn} />
+						<CreateReviewComponent
+							isbn={book.isbn}
+							addReview={(review) => {
+								setFinalReviews([...finalReviews, review])
+								setFinalAuthors([...finalAuthors, user!])
+							}}
+						/>
 					</StackItem>
 				)}
-				{reviews.map((review) => {
-					const author = authors.find(
-						(author) => author.id === review.reviewAuthorId
+				{finalReviews.map((review) => {
+					const author = finalAuthors.find(
+						(author) => author?.id === review.reviewAuthorId
 					)!
 					// the logged in user is the author of this review
-					const editable = (user && author.id === user?.id) || false
+					const editable = (user && author?.id === user?.id) || false
 					return (
-						<StackItem key={author.id}>
+						<StackItem key={review.reviewAuthorId}>
 							<ReviewComponent
 								review={review}
 								author={author}
 								editable={editable}
+								removeReview={removeReview}
 							/>
 						</StackItem>
 					)

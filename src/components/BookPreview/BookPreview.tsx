@@ -21,7 +21,6 @@ export type Props = {
 	error: string | null
 }
 const ReviewPreview = ({ book, loading, error }: Props) => {
-	console.log(book)
 	if (error) {
 		return (
 			<Card maxW="96">

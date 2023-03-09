@@ -22,12 +22,14 @@ import {
 	FormControl,
 	FormLabel,
 	FormErrorMessage,
+	useToast,
 } from "@chakra-ui/react"
 import { useFormik } from "formik"
 import { useState } from "react"
 import { toFormikValidationSchema } from "zod-formik-adapter"
 import { IoStarOutline, IoStarHalf, IoStar } from "react-icons/io5"
 import { useDebouncedCallback } from "use-debounce"
+import { Review } from "@prisma/client"
 
 function StarRating({ onChange }: { onChange: (value: number) => void }) {
 	const [rating, setRating] = useState(5)
@@ -66,9 +68,11 @@ function StarRating({ onChange }: { onChange: (value: number) => void }) {
 
 interface CreateReviewParams {
 	isbn: string
+	addReview: (review: Review) => void
 }
 
-const CreateReview = ({ isbn }: CreateReviewParams) => {
+const CreateReview = ({ isbn, addReview }: CreateReviewParams) => {
+	const toast = useToast()
 	const [isLargerThan800] = useMediaQuery("(min-width: 800px)", {
 		ssr: true,
 		fallback: true, // return false on the server, and re-evaluate on the client side
@@ -84,7 +88,31 @@ const CreateReview = ({ isbn }: CreateReviewParams) => {
 		},
 		validationSchema: toFormikValidationSchema(ReviewForm),
 		onSubmit: async (data) => {
-			// TODO: submit the form
+			const res = await fetch(`/api/reviews/${isbn}`, {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					rating: data.rating,
+					reviewText: data.reviewText,
+					threeWords: data.threeWords,
+				}),
+			}).then((x) => x.json())
+			if (res.status === "success") {
+				toast({
+					title: "Review created",
+					description: "Your review has been created",
+					status: "success",
+				})
+				addReview(res.data.review)
+			} else {
+				toast({
+					title: "Error",
+					description: "An error occurred",
+					status: "error",
+				})
+			}
 		},
 	})
 
@@ -115,7 +143,7 @@ const CreateReview = ({ isbn }: CreateReviewParams) => {
 					<FormErrorMessage>{errors.reviewText}</FormErrorMessage>
 				</FormControl>
 				<FormControl
-					isInvalid={Boolean(errors.reviewText)}
+					isInvalid={Boolean(errors.threeWords)}
 					isRequired
 					variant="floating"
 				>
@@ -134,8 +162,10 @@ const CreateReview = ({ isbn }: CreateReviewParams) => {
 					justifyContent="space-between"
 					flexDir={isLargerThan800 ? "row" : "column"}
 				>
-					<StarRating onChange={(value) => console.log(value)} />
-					<Button>Submit</Button>
+					<StarRating
+						onChange={(value) => setFieldValue("rating", value)}
+					/>
+					<Button onClick={() => submitForm()}>Submit</Button>
 				</Flex>
 			</Stack>
 		</Card>

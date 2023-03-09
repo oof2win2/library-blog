@@ -41,9 +41,19 @@ export const GET_ISBN_params = z.object({
 })
 export type GET_ISBN_params = z.infer<typeof GET_ISBN_params>
 
-export const POST_ISBN_body = z.object({
-	isbn: z.string().length(13),
-	rating: z.number().min(1).max(5),
-	review: z.string().min(1).max(1000),
+export const PUT_ISBN_query = z.object({
+	isbn: z.string(),
 })
-export type POST_ISBN_body = z.infer<typeof POST_ISBN_body>
+export type PUT_ISBN_query = z.infer<typeof PUT_ISBN_query>
+
+export const PUT_ISBN_body = z.object({
+	rating: z.number().min(1).max(5),
+	reviewText: z.string().min(1).max(1000),
+	threeWords: z
+		.string()
+		.refine(
+			(arg) => arg.split(" ").filter((x) => x).length === 3,
+			"Must be 3 words"
+		),
+})
+export type PUT_ISBN_body = z.infer<typeof PUT_ISBN_body>
