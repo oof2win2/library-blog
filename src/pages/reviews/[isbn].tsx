@@ -173,7 +173,7 @@ export default function BookPage({
 						<CreateReviewComponent
 							isbn={book.isbn}
 							addReview={(review) => {
-								setFinalReviews([...finalReviews, review])
+								setFinalReviews([review, ...finalReviews])
 								setFinalAuthors([...finalAuthors, user!])
 							}}
 						/>

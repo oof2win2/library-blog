@@ -47,7 +47,6 @@ export default function ReviewComponent({
 	})
 	const [deleteWindow, setDeleteWindow] = useState(false)
 	const deleteCancelRef = useRef<HTMLButtonElement>(null)
-	const [editWindow, setEditWindow] = useState(false)
 	const {
 		trigger: deleteReview,
 		data: deleteReviewData,
@@ -95,7 +94,6 @@ export default function ReviewComponent({
 							</Button>
 							<Button
 								colorScheme="red"
-								// TODO: actual delete
 								onClick={() => {
 									setDeleteWindow(false)
 									deleteReview(review.isbn)
@@ -115,17 +113,6 @@ export default function ReviewComponent({
 						<Text>{author.name}</Text>
 						<Text>{author.reviewAmount} reviews</Text>
 						<StarRating rating={review.rating} />
-						{editable && (
-							<Tooltip label="Edit review">
-								<IconButton
-									aria-label="Edit review"
-									variant="ghost"
-									onClick={() => setEditWindow(true)}
-								>
-									<EditIcon />
-								</IconButton>
-							</Tooltip>
-						)}
 						{editable && (
 							<Tooltip label="Delete review">
 								<IconButton
