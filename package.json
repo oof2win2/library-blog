@@ -1,5 +1,5 @@
 {
-	"name": "library-blog",
+	"name": "book_review_site",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
@@ -22,6 +22,7 @@
 		"@reduxjs/toolkit": "^1.9.3",
 		"@types/react": "18.0.27",
 		"@types/react-dom": "18.0.10",
+		"algoliasearch": "^4.15.0",
 		"bcryptjs": "^2.4.3",
 		"dotenv": "^16.0.3",
 		"envalid": "^7.3.1",
@@ -31,6 +32,7 @@
 		"framer-motion": "^8.5.5",
 		"got": "11",
 		"gray-matter": "^4.0.3",
+		"instantsearch.js": "^4.52.0",
 		"jose": "^4.11.2",
 		"next": "13.1.6",
 		"next-connect": "^0.13.0",
@@ -39,6 +41,7 @@
 		"react": "18.2.0",
 		"react-dom": "18.2.0",
 		"react-icons": "^4.7.1",
+		"react-instantsearch-hooks-web": "^6.41.0",
 		"react-redux": "^8.0.5",
 		"redux-persist": "^6.0.0",
 		"redux-thunk": "^2.4.2",

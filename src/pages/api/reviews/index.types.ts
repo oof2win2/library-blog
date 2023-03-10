@@ -57,3 +57,12 @@ export const PUT_ISBN_body = z.object({
 		),
 })
 export type PUT_ISBN_body = z.infer<typeof PUT_ISBN_body>
+
+export const DELETE_ISBN_query = z.object({
+	isbn: z.string(),
+	reviewAuthorId: z
+		.string()
+		.transform((v) => parseInt(v))
+		.optional(),
+})
+export type DELETE_ISBN_query = z.infer<typeof DELETE_ISBN_query>

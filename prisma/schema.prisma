@@ -46,6 +46,7 @@ model User {
     password     String // password bcrypt hash
     name         String?
     reviewAmount Int      @default(0)
+    authLevel    Int      @default(0) // by default, users are not admins
     reviews      Review[]
 }
 
@@ -58,4 +59,9 @@ model Session {
     exp Int
     // ID of the user it is issued to
     aud Int
+}
+
+model AllowedDomain {
+    id     Int    @id @default(autoincrement())
+    domain String @unique
 }

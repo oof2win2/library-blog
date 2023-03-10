@@ -1,8 +1,18 @@
 import { apiValidation, authAPI } from "@/middleware"
-import { ApiRequest, ApiResponse, PopulatedApiRequest } from "@/utils/types"
+import {
+	ApiRequest,
+	ApiResponse,
+	PopulatedApiRequest,
+	UserAuthLevel,
+} from "@/utils/types"
 import { NextApiResponse } from "next"
 import nc from "next-connect"
-import { GET_ISBN_params, PUT_ISBN_body, PUT_ISBN_query } from "./index.types"
+import {
+	GET_ISBN_params,
+	PUT_ISBN_body,
+	DELETE_ISBN_query,
+	PUT_ISBN_query,
+} from "./index.types"
 import { db } from "@/utils/db"
 
 const handler = nc<ApiRequest, NextApiResponse>()
@@ -29,11 +39,11 @@ handler.get<ApiRequest<{ Query: GET_ISBN_params }>>(
 )
 
 // DELETE /api/reviews/:isbn
-handler.delete<ApiRequest<{ Query: GET_ISBN_params }>>(
-	apiValidation({ query: GET_ISBN_params }),
-	authAPI,
+handler.delete<ApiRequest<{ Query: DELETE_ISBN_query }>>(
+	apiValidation({ query: DELETE_ISBN_query }),
+	authAPI(UserAuthLevel.User),
 	async (req, res) => {
-		const { isbn } = req.query
+		const { isbn, reviewAuthorId } = req.query
 
 		if (!req.populated)
 			return res.status(500).json({
@@ -72,7 +82,7 @@ handler.delete<ApiRequest<{ Query: GET_ISBN_params }>>(
 // POST /api/reviews/:isbn
 handler.put<ApiRequest<{ Body: PUT_ISBN_body; Query: PUT_ISBN_query }>>(
 	apiValidation({ body: PUT_ISBN_body, query: PUT_ISBN_query }),
-	authAPI,
+	authAPI(UserAuthLevel.User),
 	async (req, res) => {
 		if (!req.populated)
 			return res.status(500).json({

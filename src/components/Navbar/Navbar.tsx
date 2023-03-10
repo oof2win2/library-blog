@@ -12,6 +12,7 @@ import { HamburgerIcon, CloseIcon, MoonIcon, SunIcon } from "@chakra-ui/icons"
 import Link from "next/link"
 import { useState } from "react"
 import { useAppSelector } from "@/utils/redux/hooks"
+import { UserAuthLevel } from "@/utils/types"
 
 type Page = {
 	type: "page"
@@ -24,11 +25,6 @@ const initialPages: Page[] = [
 		type: "page",
 		title: "Home",
 		href: "/",
-	},
-	{
-		type: "page",
-		title: "Reviews",
-		href: "/reviews",
 	},
 ]
 
@@ -56,12 +52,13 @@ const LoggedIn: Page[] = [
 		href: "/user/logout",
 	},
 ]
+const AdminPanel: Page = {
+	type: "page",
+	title: "Admin Panel",
+	href: "/admin",
+}
 
 const Navbar = () => {
-	const [isDesktop] = useMediaQuery("(min-width: 800px)", {
-		ssr: true,
-		fallback: true, // return false on the server, and re-evaluate on the client side
-	})
 	const [mobileIsOpen, setMobileIsOpen] = useState(false)
 	const { colorMode, toggleColorMode } = useColorMode()
 	const isDark = colorMode === "dark"
@@ -70,6 +67,10 @@ const Navbar = () => {
 	const pages: Page[] = [...initialPages]
 
 	if (user) {
+		if (user.authLevel === UserAuthLevel.Admin) {
+			pages.push(AdminPanel)
+		}
+
 		pages.push(...LoggedIn)
 	} else {
 		pages.push(...LoggedOut)

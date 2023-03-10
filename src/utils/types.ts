@@ -53,3 +53,8 @@ export type PopulatedApiRequest<
 > = ApiRequest<Params> & {
 	populated: true
 }
+
+export enum UserAuthLevel {
+	User,
+	Admin,
+}

@@ -21,6 +21,7 @@ import ReviewComponent from "@/components/Review/Review"
 import CreateReviewComponent from "@/components/Review/CreateReview"
 import StarRating from "@/components/StarRating"
 import { useAppSelector } from "@/utils/redux/hooks"
+import { UserAuthLevel } from "@/utils/types"
 
 interface BookData {
 	isbn: number
@@ -184,7 +185,10 @@ export default function BookPage({
 						(author) => author?.id === review.reviewAuthorId
 					)!
 					// the logged in user is the author of this review
-					const editable = (user && author?.id === user?.id) || false
+					const editable =
+						(user && user.authLevel >= UserAuthLevel.Admin) ||
+						(user && author?.id === user?.id) ||
+						false
 					return (
 						<StackItem key={review.reviewAuthorId}>
 							<ReviewComponent

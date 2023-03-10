@@ -11,8 +11,11 @@ const JWT_SECRET = Buffer.from(ENV.JWT_SECRET)
  * Get session
  */
 export async function getSessionData(
-	cookie: string | undefined
+	cookies: Partial<{
+		[key: string]: string
+	}>
 ): Promise<null | SessionData> {
+	const cookie = cookies[ENV.COOKIE_NAME]
 	if (!cookie) return null
 	if (!cookie.startsWith("Bearer ")) return null
 
