@@ -23,12 +23,6 @@ import StarRating from "@/components/StarRating"
 import { useEffect, useRef, useState } from "react"
 import useSWRMutation from "swr/mutation"
 
-async function DeleteReview(url: string, { arg }: { arg: string }) {
-	return fetch(`${url}/${arg}`, {
-		method: "DELETE",
-	}).then((res) => res.json())
-}
-
 export default function ReviewComponent({
 	review,
 	author,
@@ -51,7 +45,16 @@ export default function ReviewComponent({
 		trigger: deleteReview,
 		data: deleteReviewData,
 		error: deleteReviewError,
-	} = useSWRMutation("/api/reviews", DeleteReview)
+	} = useSWRMutation(
+		"/api/reviews",
+		async (url, { arg }: { arg: string }) => {
+			const qs = new URLSearchParams()
+			qs.set("reviewAuthorId", review.reviewAuthorId.toString())
+			return fetch(`${url}/${arg}?${qs.toString()}`, {
+				method: "DELETE",
+			}).then((res) => res.json())
+		}
+	)
 
 	// remove the review from the page when it's deleted
 	useEffect(() => {

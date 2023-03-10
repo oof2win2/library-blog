@@ -53,11 +53,17 @@ handler.delete<ApiRequest<{ Query: DELETE_ISBN_query }>>(
 				description: "You are not logged in",
 			})
 
+		// delete of query first or user if the user is admin
+		const authorId =
+			req.user.authLevel === UserAuthLevel.Admin
+				? reviewAuthorId || req.user.id
+				: req.user.id
+
 		const review = await db.review.delete({
 			where: {
 				isbn_reviewAuthorId: {
 					isbn: isbn.toString(),
-					reviewAuthorId: req.user.id,
+					reviewAuthorId: authorId,
 				},
 			},
 		})
