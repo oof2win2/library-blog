@@ -89,6 +89,9 @@ export default function Admin(
 				fetch(url, {
 					method: "PUT",
 					body: JSON.stringify({ domain: arg }),
+					headers: {
+						"Content-Type": "application/json",
+					},
 				}).then((res) => res.json())
 		)
 	const { trigger: removeAllowedDomain, data: removeAllowedDomainData } =
@@ -128,10 +131,11 @@ export default function Admin(
 
 	useEffect(() => {
 		if (addAllowedDomainData) {
+			console.log(addAllowedDomainData)
 			if (addAllowedDomainData.status === "success") {
 				setAllowedDomains([
 					...allowedDomains,
-					addAllowedDomainData.data,
+					addAllowedDomainData.data.domain,
 				])
 			}
 		}
@@ -141,7 +145,8 @@ export default function Admin(
 			if (removeAllowedDomainData.status === "success") {
 				setAllowedDomains(
 					allowedDomains.filter(
-						(domain) => domain !== removeAllowedDomainData.data
+						(domain) =>
+							domain !== removeAllowedDomainData.data.domain
 					)
 				)
 			}
@@ -237,9 +242,12 @@ export default function Admin(
 								type="email"
 								onChange={props.handleChange}
 								onBlur={props.handleBlur}
-								value={props.values.email}
 								name="email"
+								placeholder="pupil@parklane-is.com"
 							/>
+							<FormErrorMessage>
+								{props.errors.email}
+							</FormErrorMessage>
 						</FormControl>
 						<Button type="submit">Submit</Button>
 					</form>
@@ -281,13 +289,14 @@ export default function Admin(
 								The ending of the domain (after the @ symbol)
 							</FormLabel>
 							<Input
-								type="email"
 								onChange={props.handleChange}
 								onBlur={props.handleBlur}
-								value={props.values.domain}
-								name="email"
+								name="domain"
 								placeholder="parklane-is.com"
 							/>
+							<FormErrorMessage>
+								{props.errors.domain}
+							</FormErrorMessage>
 						</FormControl>
 						<Button type="submit">Submit</Button>
 					</form>

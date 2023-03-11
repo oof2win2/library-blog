@@ -1,3 +1,4 @@
+import { PUT_AllowedDomains_Body } from "@/pages/api/admins/index.types"
 import { z } from "zod"
 
 export const SignupForm = z.object({
@@ -17,7 +18,5 @@ export const EditAdminUser = z.object({
 })
 export type EditAdminUserType = z.infer<typeof EditAdminUser>
 
-export const EditAllowedDomain = z.object({
-	domain: z.string(),
-})
+export const EditAllowedDomain = PUT_AllowedDomains_Body
 export type EditAllowedDomainType = z.infer<typeof EditAllowedDomain>
