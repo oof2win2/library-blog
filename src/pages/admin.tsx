@@ -1,4 +1,3 @@
-import RequireAuth from "@/components/RequireAuth"
 import { getSessionData } from "@/utils/auth"
 import { db } from "@/utils/db"
 import { UserAuthLevel } from "@/utils/types"
@@ -10,7 +9,6 @@ import {
 import {
 	Heading,
 	Table,
-	TableCaption,
 	TableContainer,
 	Thead,
 	Tr,
@@ -22,8 +20,6 @@ import {
 	FormLabel,
 	FormErrorMessage,
 	Button,
-	Flex,
-	FormHelperText,
 	IconButton,
 	AlertDialog,
 	AlertDialogBody,
@@ -36,12 +32,7 @@ import {
 } from "@chakra-ui/react"
 import { User } from "@prisma/client"
 import { Formik } from "formik"
-import {
-	GetServerSideProps,
-	GetServerSidePropsContext,
-	GetServerSidePropsResult,
-	InferGetServerSidePropsType,
-} from "next"
+import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { useEffect, useRef, useState } from "react"
 import { toFormikValidationSchema } from "zod-formik-adapter"
 import useSWRMutation from "swr/mutation"
@@ -226,7 +217,8 @@ export default function Admin(
 						</AlertDialogHeader>
 
 						<AlertDialogBody>
-							Are you sure? You can't undo this action afterwards.
+							Are you sure? You can&apos;t undo this action
+							afterwards.
 						</AlertDialogBody>
 
 						<AlertDialogFooter>
@@ -336,6 +328,35 @@ export default function Admin(
 				initialValues={{ domain: "" }}
 				validationSchema={toFormikValidationSchema(EditAllowedDomain)}
 				onSubmit={(values) => addAllowedDomain(values.domain)}
+			>
+				{(props) => (
+					<form onSubmit={props.handleSubmit}>
+						<FormControl
+							isRequired
+							isInvalid={Boolean(props.errors.domain)}
+						>
+							<FormLabel>
+								The ending of the domain (after the @ symbol)
+							</FormLabel>
+							<Input
+								onChange={props.handleChange}
+								onBlur={props.handleBlur}
+								name="domain"
+								placeholder="parklane-is.com"
+							/>
+							<FormErrorMessage>
+								{props.errors.domain}
+							</FormErrorMessage>
+						</FormControl>
+						<Button type="submit">Submit</Button>
+					</form>
+				)}
+			</Formik>
+			<Heading size="md">Remove allowed domain</Heading>
+			<Formik
+				initialValues={{ domain: "" }}
+				validationSchema={toFormikValidationSchema(EditAllowedDomain)}
+				onSubmit={(values) => removeAllowedDomain(values.domain)}
 			>
 				{(props) => (
 					<form onSubmit={props.handleSubmit}>

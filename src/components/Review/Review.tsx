@@ -17,7 +17,7 @@ import {
 	Divider,
 	useToast,
 } from "@chakra-ui/react"
-import { EditIcon, DeleteIcon } from "@chakra-ui/icons"
+import { DeleteIcon } from "@chakra-ui/icons"
 import { Review, User } from "@prisma/client"
 import StarRating from "@/components/StarRating"
 import { useEffect, useRef, useState } from "react"
@@ -41,11 +41,7 @@ export default function ReviewComponent({
 	})
 	const [deleteWindow, setDeleteWindow] = useState(false)
 	const deleteCancelRef = useRef<HTMLButtonElement>(null)
-	const {
-		trigger: deleteReview,
-		data: deleteReviewData,
-		error: deleteReviewError,
-	} = useSWRMutation(
+	const { trigger: deleteReview, data: deleteReviewData } = useSWRMutation(
 		"/api/reviews",
 		async (url, { arg }: { arg: string }) => {
 			const qs = new URLSearchParams()
@@ -85,7 +81,8 @@ export default function ReviewComponent({
 						</AlertDialogHeader>
 
 						<AlertDialogBody>
-							Are you sure? You can't undo this action afterwards.
+							Are you sure? You can&apos;t undo this action
+							afterwards.
 						</AlertDialogBody>
 
 						<AlertDialogFooter>

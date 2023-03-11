@@ -5,11 +5,7 @@ import {
 	configureStore,
 	ThunkAction,
 } from "@reduxjs/toolkit"
-import useWrappedStore, {
-	createWrapper,
-	HYDRATE,
-	MakeStore,
-} from "next-redux-wrapper"
+import { createWrapper, HYDRATE } from "next-redux-wrapper"
 import { userReducer } from "./parts/user"
 import { persistStore, persistReducer } from "redux-persist"
 // use localStorage as a store

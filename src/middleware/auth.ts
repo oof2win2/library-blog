@@ -1,8 +1,7 @@
 import { getSessionData } from "@/utils/auth"
 import { ApiRequest, UserAuthLevel } from "@/utils/types"
-import { NextApiRequest, NextApiResponse } from "next"
+import { NextApiResponse } from "next"
 import { NextHandler } from "next-connect"
-import ENV from "@/utils/env"
 
 /**
  * Check if a user is authenticated and if so, allow them to access the page.

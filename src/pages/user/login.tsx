@@ -25,7 +25,6 @@ export default function SignIn() {
 	const { user } = useAppSelector((state) => state.user)
 	const router = useRouter()
 	const [reqError, setReqError] = useState<string | null>(null)
-	const [success, setSuccess] = useState(false)
 	const [loading, setLoading] = useState(false)
 	const { setFieldValue, submitForm, errors } = useFormik<LoginFormType>({
 		initialValues: {
@@ -48,7 +47,6 @@ export default function SignIn() {
 				})
 				const json = await res.json()
 				if (json.status === "success") {
-					setSuccess(true)
 					setReqError(null)
 					dispatch(login(json.data))
 					// go to homepage in 2s

@@ -1,5 +1,5 @@
-import { Box, Flex, Grid, GridItem, HStack, Stack } from "@chakra-ui/react"
-import { Book, Review } from "@prisma/client"
+import { Box, Flex } from "@chakra-ui/react"
+import { Book } from "@prisma/client"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import BookPreview from "../BookPreview/BookPreview"
@@ -7,7 +7,6 @@ import BookPreview from "../BookPreview/BookPreview"
 const ReviewRow = ({ length }: { length: number }) => {
 	const [books, setBooks] = useState<Book[]>()
 	const [loading, setLoading] = useState(true)
-	const [error, setError] = useState<string | null>(null)
 
 	useEffect(() => {
 		setLoading(true)
@@ -16,10 +15,8 @@ const ReviewRow = ({ length }: { length: number }) => {
 			.then((res) => {
 				setBooks(res.data.books)
 				setLoading(false)
-				setError(null)
 			})
 			.catch((err) => {
-				setError(err.message)
 				setLoading(false)
 			})
 	}, [])

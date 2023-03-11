@@ -1,5 +1,5 @@
 import { apiValidation } from "@/middleware"
-import { ApiRequest, ApiResponse, PopulatedApiRequest } from "@/utils/types"
+import { ApiRequest } from "@/utils/types"
 import { NextApiResponse } from "next"
 import nc from "next-connect"
 import { GET_Base_query } from "./index.types"

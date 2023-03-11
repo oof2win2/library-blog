@@ -1,15 +1,13 @@
 "use client"
-import { Book, Review } from "@prisma/client"
+import { Book } from "@prisma/client"
 import {
 	Card,
 	CardHeader,
 	CardBody,
-	CardFooter,
 	Text,
 	SkeletonText,
 	Skeleton,
 	Center,
-	Divider,
 	Stack,
 	StackDivider,
 	Box,

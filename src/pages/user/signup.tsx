@@ -9,7 +9,6 @@ import {
 	Input,
 	Text,
 } from "@chakra-ui/react"
-import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useFormik } from "formik"
 import { SignupForm, SignupFormType } from "@/utils/validators/UserForms"

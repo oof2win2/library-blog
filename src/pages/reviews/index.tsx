@@ -1,4 +1,4 @@
-import { Center, Container } from "@chakra-ui/react"
+import { Container } from "@chakra-ui/react"
 import ReviewRow from "../../components/BookRow/BookRow"
 
 export default function Home() {

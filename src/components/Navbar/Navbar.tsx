@@ -84,6 +84,7 @@ const Navbar = () => {
 	const [searchTerm] = useDebounce(currentSearchTerm, 200)
 	const bookIndex = meiliSearchClient.index("book")
 	const [searchResults, setSearchResults] = useState<SearchBookType[]>([])
+	const borderColor = useColorModeValue("gray.200", "gray.700")
 
 	useEffect(() => {
 		if (searchTerm) {
@@ -138,10 +139,7 @@ const Navbar = () => {
 									justifyContent="space-between"
 									padding="10px"
 									border="1px solid"
-									borderColor={useColorModeValue(
-										"gray.200",
-										"gray.700"
-									)}
+									borderColor={borderColor}
 									borderRadius="md"
 								>
 									<Flex alignItems="center">

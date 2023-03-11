@@ -4,7 +4,7 @@ import { ChakraProvider } from "@chakra-ui/react"
 import { AppProps } from "next/app"
 import Head from "next/head"
 import theme from "@/utils/chakraTheme"
-import { Provider, useStore } from "react-redux"
+import { Provider } from "react-redux"
 import { PersistGate } from "redux-persist/integration/react"
 import { wrapper } from "@/utils/redux/store"
 

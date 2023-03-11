@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next"
+import { NextApiResponse } from "next"
 import { SessionData } from "./validators"
 import * as jose from "jose"
 import ENV from "./env"

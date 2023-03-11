@@ -1,6 +1,6 @@
 import { useAppSelector } from "@/utils/redux/hooks"
 import { UserAuthLevel } from "@/utils/types"
-import { Center, Container, Heading, Text, Box } from "@chakra-ui/react"
+import { Center, Container, Heading, Text } from "@chakra-ui/react"
 import NextLink from "next/link"
 
 export default function RequireAuth({

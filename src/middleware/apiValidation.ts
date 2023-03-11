@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { NextHandler } from "next-connect"
-import { SafeParseError, z } from "zod"
+import { z } from "zod"
 
 /**
  * Validate a user's request with zod

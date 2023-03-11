@@ -3,15 +3,12 @@ import {
 	Container,
 	Divider,
 	Heading,
-	HStack,
-	Skeleton,
 	StackItem,
 	Text,
 	Center,
 	StackDivider,
 	Stack,
 	Box,
-	useMediaQuery,
 } from "@chakra-ui/react"
 import { db } from "@/utils/db"
 import { Book, Review, User } from "@prisma/client"
@@ -22,10 +19,6 @@ import CreateReviewComponent from "@/components/Review/CreateReview"
 import StarRating from "@/components/StarRating"
 import { useAppSelector } from "@/utils/redux/hooks"
 import { UserAuthLevel } from "@/utils/types"
-
-interface BookData {
-	isbn: number
-}
 
 export async function getServerSideProps({
 	params,
@@ -96,6 +89,18 @@ export default function BookPage({
 	const [finalReviews, setFinalReviews] = useState(reviews)
 	const [finalAuthors, setFinalAuthors] = useState(authors)
 
+	// we need to ensure that if a user is logged in and they posted a review, that review is at the top of the list
+	// so we sort the reviews by the reviewAuthorId, and if the user is logged in, we put the user's review at the top
+	useEffect(() => {
+		setFinalReviews(
+			finalReviews.sort((a, b) => {
+				if (user && user?.id === a.reviewAuthorId) return -1
+				if (user && user?.id === b.reviewAuthorId) return -1
+				return 1
+			})
+		)
+	}, [finalReviews])
+
 	if (!book)
 		return (
 			<Container maxW="80ch">
@@ -114,17 +119,6 @@ export default function BookPage({
 		setFinalAuthors(finalAuthors.filter((x) => x.id !== reviewAuthorId))
 	}
 
-	// we need to ensure that if a user is logged in and they posted a review, that review is at the top of the list
-	// so we sort the reviews by the reviewAuthorId, and if the user is logged in, we put the user's review at the top
-	useEffect(() => {
-		setFinalReviews(
-			finalReviews.sort((a, b) => {
-				if (user && user?.id === a.reviewAuthorId) return -1
-				if (user && user?.id === b.reviewAuthorId) return -1
-				return 1
-			})
-		)
-	}, [finalReviews])
 	const userHasReview = finalReviews.some(
 		(review) => user && user.id === review.reviewAuthorId
 	)

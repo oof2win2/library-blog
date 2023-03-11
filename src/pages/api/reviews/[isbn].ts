@@ -1,10 +1,5 @@
 import { apiValidation, authAPI } from "@/middleware"
-import {
-	ApiRequest,
-	ApiResponse,
-	PopulatedApiRequest,
-	UserAuthLevel,
-} from "@/utils/types"
+import { ApiRequest, UserAuthLevel } from "@/utils/types"
 import { NextApiResponse } from "next"
 import nc from "next-connect"
 import {

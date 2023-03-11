@@ -1,11 +1,7 @@
-import { authAPI } from "@/middleware"
-import { ApiRequest, ApiResponse, PopulatedApiRequest } from "@/utils/types"
+import { ApiRequest } from "@/utils/types"
 import { NextApiResponse } from "next"
 import nc from "next-connect"
-import { db } from "@/utils/db"
-import { LoginForm, LoginFormType } from "@/utils/validators/UserForms"
-import bcrypt from "bcryptjs"
-import { clearSessionData, saveSessionData } from "@/utils/auth"
+import { clearSessionData } from "@/utils/auth"
 
 const handler = nc<ApiRequest, NextApiResponse>()
 
