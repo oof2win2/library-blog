@@ -21,6 +21,5 @@ export const GET_Base_query = z.object({
 			}
 			return num
 		}),
-	query: z.string().optional(),
 })
 export type GET_Base_query = z.infer<typeof GET_Base_query>
