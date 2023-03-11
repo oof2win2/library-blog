@@ -2,7 +2,11 @@ import RequireAuth from "@/components/RequireAuth"
 import { getSessionData } from "@/utils/auth"
 import { db } from "@/utils/db"
 import { UserAuthLevel } from "@/utils/types"
-import { EditAdminUser, EditAllowedDomain } from "@/utils/validators/UserForms"
+import {
+	EditAdminUser,
+	EditAllowedDomain,
+	EditBook,
+} from "@/utils/validators/UserForms"
 import {
 	Heading,
 	Table,
@@ -101,8 +105,33 @@ export default function Admin(
 				fetch(url, {
 					method: "DELETE",
 					body: JSON.stringify({ domain: arg }),
+					headers: {
+						"Content-Type": "application/json",
+					},
 				}).then((res) => res.json())
 		)
+	const { trigger: addBook, data: addBookData } = useSWRMutation(
+		"/api/admins/manage-books",
+		(url, { arg }: { arg: string }) =>
+			fetch(url, {
+				method: "PUT",
+				body: JSON.stringify({ isbn: arg }),
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}).then((x) => x.json())
+	)
+	const { trigger: removeBook, data: removeBookData } = useSWRMutation(
+		"/api/admins/manage-books",
+		(url, { arg }: { arg: string }) =>
+			fetch(url, {
+				method: "DELETE",
+				body: JSON.stringify({ isbn: arg }),
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}).then((x) => x.json())
+	)
 
 	useEffect(() => {
 		if (demoteAdminData) {
@@ -152,6 +181,35 @@ export default function Admin(
 			}
 		}
 	}, [removeAllowedDomainData])
+
+	useEffect(() => {
+		if (addBookData) {
+			if (addBookData.status === "success") {
+				toast({
+					title: "Book added",
+					description: "Book added successfully",
+					status: "success",
+				})
+			} else {
+				toast({
+					title: "Error adding book",
+					description: addBookData.message,
+					status: "error",
+				})
+			}
+		}
+	}, [addBookData])
+	useEffect(() => {
+		if (removeBookData) {
+			if (removeBookData.status === "success") {
+				toast({
+					title: "Book removed",
+					description: "Book removed successfully",
+					status: "success",
+				})
+			}
+		}
+	}, [removeBookData])
 
 	return (
 		<Container maxW="80ch">
@@ -296,6 +354,64 @@ export default function Admin(
 							/>
 							<FormErrorMessage>
 								{props.errors.domain}
+							</FormErrorMessage>
+						</FormControl>
+						<Button type="submit">Submit</Button>
+					</form>
+				)}
+			</Formik>
+
+			<Divider m={4} />
+
+			<Heading>Books</Heading>
+			<Heading size="md">Add book</Heading>
+			<Formik
+				initialValues={{ isbn: "" }}
+				validationSchema={toFormikValidationSchema(EditBook)}
+				onSubmit={(values) => addBook(values.isbn)}
+			>
+				{(props) => (
+					<form onSubmit={props.handleSubmit}>
+						<FormControl
+							isRequired
+							isInvalid={Boolean(props.errors.isbn)}
+						>
+							<FormLabel>ISBN of the book</FormLabel>
+							<Input
+								onChange={props.handleChange}
+								onBlur={props.handleBlur}
+								name="isbn"
+								placeholder="978-1-56619-909-4"
+							/>
+							<FormErrorMessage>
+								{props.errors.isbn}
+							</FormErrorMessage>
+						</FormControl>
+						<Button type="submit">Submit</Button>
+					</form>
+				)}
+			</Formik>
+			<Heading size="md">Remove book</Heading>
+			<Formik
+				initialValues={{ isbn: "" }}
+				validationSchema={toFormikValidationSchema(EditBook)}
+				onSubmit={(values) => removeBook(values.isbn)}
+			>
+				{(props) => (
+					<form onSubmit={props.handleSubmit}>
+						<FormControl
+							isRequired
+							isInvalid={Boolean(props.errors.isbn)}
+						>
+							<FormLabel>ISBN of the book</FormLabel>
+							<Input
+								onChange={props.handleChange}
+								onBlur={props.handleBlur}
+								name="isbn"
+								placeholder="978-1-56619-909-4"
+							/>
+							<FormErrorMessage>
+								{props.errors.isbn}
 							</FormErrorMessage>
 						</FormControl>
 						<Button type="submit">Submit</Button>

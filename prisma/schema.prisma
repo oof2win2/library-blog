@@ -44,7 +44,7 @@ model User {
     id           Int      @id @default(autoincrement())
     email        String   @unique
     password     String // password bcrypt hash
-    name         String?
+    name         String
     reviewAmount Int      @default(0)
     authLevel    Int      @default(0) // by default, users are not admins
     reviews      Review[]

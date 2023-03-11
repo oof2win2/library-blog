@@ -25,10 +25,9 @@ import {
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useAppSelector } from "@/utils/redux/hooks"
-import { UserAuthLevel } from "@/utils/types"
+import { UserAuthLevel, SearchBookType } from "@/utils/types"
 import { useDebounce } from "use-debounce"
 import { meiliSearchClient } from "@/utils/meilisearch/client"
-import { Book } from "@prisma/client"
 import Image from "next/image"
 
 type Page = {
@@ -74,16 +73,6 @@ const AdminPanel: Page = {
 	title: "Admin Panel",
 	href: "/admin",
 }
-
-type SearchBookType = Pick<
-	Book,
-	| "isbn"
-	| "authors"
-	| "largeThumbnail"
-	| "smallThumbnail"
-	| "title"
-	| "subtitle"
->
 
 const Navbar = () => {
 	const [mobileIsOpen, setMobileIsOpen] = useState(false)

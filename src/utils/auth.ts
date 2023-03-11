@@ -16,6 +16,7 @@ export async function getSessionData(
 	}>
 ): Promise<null | SessionData> {
 	const cookie = cookies[ENV.COOKIE_NAME]
+	console.log(cookie)
 	if (!cookie) return null
 	if (!cookie.startsWith("Bearer ")) return null
 

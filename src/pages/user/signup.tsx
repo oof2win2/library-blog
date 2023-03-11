@@ -12,69 +12,48 @@ import {
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useFormik } from "formik"
-import { LoginForm } from "@/utils/validators/UserForms"
-import type { LoginFormType } from "@/utils/validators/UserForms"
+import { SignupForm, SignupFormType } from "@/utils/validators/UserForms"
 import { toFormikValidationSchema } from "zod-formik-adapter"
 import { useDebouncedCallback } from "use-debounce"
 import { useAppDispatch, useAppSelector } from "@/utils/redux/hooks"
 import { useRouter } from "next/router"
 import { login } from "@/utils/redux/parts/user"
+import useSWRMutation from "swr/mutation"
 
-export default function SignIn() {
+export default function SignUp() {
 	const dispatch = useAppDispatch()
 	const { user } = useAppSelector((state) => state.user)
 	const router = useRouter()
-	const [reqError, setReqError] = useState<string | null>(null)
-	const [success, setSuccess] = useState(false)
-	const [loading, setLoading] = useState(false)
-	const { setFieldValue, submitForm, errors } = useFormik<LoginFormType>({
+	const [error, setError] = useState<string | null>(null)
+	const {
+		trigger: sendSignup,
+		data: signupData,
+		isMutating: loading,
+	} = useSWRMutation(
+		"/api/user/signup",
+		async (
+			url,
+			{ arg }: { arg: { email: string; password: string; name: string } }
+		) => {
+			const x = await fetch(url, {
+				method: "POST",
+				body: JSON.stringify(arg),
+				headers: {
+					"Content-Type": "application/json",
+				},
+			})
+			return await x.json()
+		}
+	)
+	const { setFieldValue, submitForm, errors } = useFormik<SignupFormType>({
 		initialValues: {
 			email: "",
 			password: "",
+			name: "",
 		},
-		validationSchema: toFormikValidationSchema(LoginForm),
-		onSubmit: async ({ email, password }) => {
-			setLoading(true)
-			try {
-				const res = await fetch("/api/user/login", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						email,
-						password,
-					}),
-				})
-				const json = await res.json()
-				if (json.status === "success") {
-					setSuccess(true)
-					setReqError(null)
-					dispatch(login(json.data))
-					// go to homepage in 2s
-					setTimeout(() => {
-						router.push("/")
-					}, 2000)
-				}
-				if (res.status !== 200) {
-					const error = json.errors[0]
-					if (!error) setReqError("An error occured")
-					switch (error.message) {
-						case "Email or password is wrong":
-							setReqError(
-								"Email address or password is wrong, please try again"
-							)
-							break
-						default:
-							setReqError("An unknown error occured")
-					}
-				}
-			} catch (err) {
-				console.error(reqError)
-				setReqError("An error occured")
-			}
-			setLoading(false)
-		},
+		validationSchema: toFormikValidationSchema(SignupForm),
+		onSubmit: async ({ email, password, name }) =>
+			sendSignup({ email, password, name }),
 	})
 	const debouncedSetFieldValue = useDebouncedCallback(
 		(fieldName: string, fieldValue: string) => {
@@ -84,10 +63,20 @@ export default function SignIn() {
 	)
 
 	useEffect(() => {
+		if (signupData) {
+			if (signupData.status === "success") {
+				dispatch(login(signupData.data))
+			} else {
+				setError(signupData.message)
+			}
+		}
+	}, [signupData])
+
+	useEffect(() => {
 		if (user) {
 			router.push("/")
 		}
-	}, [])
+	}, [user])
 
 	if (user) {
 		return (
@@ -103,19 +92,8 @@ export default function SignIn() {
 	return (
 		<Container maxW="60ch">
 			<Center flexDir="column">
-				<Heading m={5}>Login</Heading>
-				<Text>
-					Don&apos;t have an account?{" "}
-					<Link
-						href="/user/signup"
-						style={{ textDecoration: "underline" }}
-					>
-						Sign up here
-					</Link>
-				</Text>
-
-				<Text>{reqError}</Text>
-
+				<Heading m={5}>Signup</Heading>
+				<Text>{error}</Text>
 				<FormControl
 					isInvalid={Boolean(errors.email)}
 					isRequired
@@ -149,8 +127,24 @@ export default function SignIn() {
 					/>
 					<FormErrorMessage>{errors.password}</FormErrorMessage>
 				</FormControl>
+				<FormControl
+					isInvalid={Boolean(errors.name)}
+					isRequired
+					m={2}
+					variant="floating"
+				>
+					<FormLabel>Your name</FormLabel>
+					<Input
+						placeholder="Bob Smith"
+						onChange={(e) => {
+							debouncedSetFieldValue("name", e.target.value)
+						}}
+						isRequired
+					/>
+					<FormErrorMessage>{errors.name}</FormErrorMessage>
+				</FormControl>
 				<Button m={5} isDisabled={loading} onClick={() => submitForm()}>
-					Login
+					Signup
 				</Button>
 			</Center>
 		</Container>

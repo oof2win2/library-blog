@@ -1,7 +1,6 @@
-import { User } from "@prisma/client"
+import { User, Book } from "@prisma/client"
 import { NextApiRequest } from "next"
 import { SessionData } from "./validators"
-// import { SessionDataType } from "./validators"
 
 export type ApiError = {
 	statusCode: number
@@ -58,3 +57,13 @@ export enum UserAuthLevel {
 	User,
 	Admin,
 }
+
+export type SearchBookType = Pick<
+	Book,
+	| "isbn"
+	| "authors"
+	| "largeThumbnail"
+	| "smallThumbnail"
+	| "title"
+	| "subtitle"
+>

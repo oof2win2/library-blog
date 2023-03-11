@@ -85,7 +85,7 @@ handler.delete<ApiRequest<{ Query: DELETE_ISBN_query }>>(
 	}
 )
 
-// POST /api/reviews/:isbn
+// PUT /api/reviews/:isbn
 handler.put<ApiRequest<{ Body: PUT_ISBN_body; Query: PUT_ISBN_query }>>(
 	apiValidation({ body: PUT_ISBN_body, query: PUT_ISBN_query }),
 	authAPI(UserAuthLevel.User),
