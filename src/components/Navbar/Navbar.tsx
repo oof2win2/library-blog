@@ -13,6 +13,7 @@ import {
 	ModalCloseButton,
 	Input,
 	Stack,
+	Text,
 } from "@chakra-ui/react"
 import {
 	HamburgerIcon,
@@ -175,6 +176,12 @@ const Navbar = () => {
 											<Heading size="xs">
 												{book.subtitle}
 											</Heading>
+											<Text size="xs">
+												{book.authors}
+											</Text>
+											<Text size="xs">
+												ISBN: {book.isbn}
+											</Text>
 										</Flex>
 									</Flex>
 								</Flex>
@@ -223,14 +230,14 @@ const Navbar = () => {
 				alignItems="center"
 			>
 				<IconButton
-							aria-label="Search"
-							size="lg"
-							as="a"
-							variant="ghost"
-							onClick={() => setSearchIsOpen(true)}
-						>
-							<SearchIcon />
-						</IconButton>
+					aria-label="Search"
+					size="lg"
+					as="a"
+					variant="ghost"
+					onClick={() => setSearchIsOpen(true)}
+				>
+					<SearchIcon />
+				</IconButton>
 				<IconButton
 					aria-label="Open Menu"
 					size="lg"
