@@ -8,16 +8,9 @@ export default async function handler(
 ) {
 	await db.passwordReset.deleteMany({
 		where: {
-			OR: [
-				{
-					expiresAt: {
-						lt: new Date(),
-					},
-				},
-				{
-					userId: null,
-				},
-			],
+			expiresAt: {
+				lt: new Date(),
+			},
 		},
 	})
 
@@ -33,16 +26,9 @@ export default async function handler(
 
 	await db.userVerification.deleteMany({
 		where: {
-			OR: [
-				{
-					expiresAt: {
-						lt: new Date(),
-					},
-				},
-				{
-					userId: null,
-				},
-			],
+			expiresAt: {
+				lt: new Date(),
+			},
 		},
 	})
 
