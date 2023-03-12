@@ -14,13 +14,11 @@ import { useFormik } from "formik"
 import { SignupForm, SignupFormType } from "@/utils/validators/UserForms"
 import { toFormikValidationSchema } from "zod-formik-adapter"
 import { useDebouncedCallback } from "use-debounce"
-import { useAppDispatch, useAppSelector } from "@/utils/redux/hooks"
+import { useAppSelector } from "@/utils/redux/hooks"
 import { useRouter } from "next/router"
-import { login } from "@/utils/redux/parts/user"
 import useSWRMutation from "swr/mutation"
 
 export default function SignUp() {
-	const dispatch = useAppDispatch()
 	const { user } = useAppSelector((state) => state.user)
 	const router = useRouter()
 	const [error, setError] = useState<string | null>(null)

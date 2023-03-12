@@ -2,6 +2,7 @@ import {
 	Button,
 	Center,
 	Container,
+	Divider,
 	FormControl,
 	FormErrorMessage,
 	FormLabel,
@@ -19,64 +20,38 @@ import { useDebouncedCallback } from "use-debounce"
 import { useAppDispatch, useAppSelector } from "@/utils/redux/hooks"
 import { useRouter } from "next/router"
 import { login } from "@/utils/redux/parts/user"
+import useSWRMutation from "swr/mutation"
 
 export default function SignIn() {
 	const dispatch = useAppDispatch()
 	const { user } = useAppSelector((state) => state.user)
 	const router = useRouter()
 	const [reqError, setReqError] = useState<string | null>(null)
-	const [loading, setLoading] = useState(false)
+	const [resetPassword, setResetPassword] = useState(false)
+	const {
+		trigger: sendLogin,
+		data: loginData,
+		isMutating: loginLoading,
+	} = useSWRMutation(
+		"/api/user/login",
+		async (url, { arg }: { arg: { email: string; password: string } }) => {
+			const x = await fetch(url, {
+				method: "POST",
+				body: JSON.stringify(arg),
+				headers: {
+					"Content-Type": "application/json",
+				},
+			})
+			return await x.json()
+		}
+	)
 	const { setFieldValue, submitForm, errors } = useFormik<LoginFormType>({
 		initialValues: {
 			email: "",
 			password: "",
 		},
 		validationSchema: toFormikValidationSchema(LoginForm),
-		onSubmit: async ({ email, password }) => {
-			setLoading(true)
-			try {
-				const res = await fetch("/api/user/login", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						email,
-						password,
-					}),
-				})
-				const json = await res.json()
-				if (json.status === "success") {
-					setReqError(null)
-					dispatch(login(json.data))
-					// go to homepage in 2s
-					setTimeout(() => {
-						router.push("/")
-					}, 2000)
-				}
-				if (res.status !== 200) {
-					const error = json.errors[0]
-					if (!error) setReqError("An error occured")
-					switch (error.message) {
-						case "Email or password is wrong":
-							setReqError(
-								"Email address or password is wrong, please try again"
-							)
-							break
-						case "Please verify your email":
-							setReqError(
-								"Please verify your email address before logging in"
-							)
-						default:
-							setReqError("An unknown error occured")
-					}
-				}
-			} catch (err) {
-				console.error(reqError)
-				setReqError("An error occured")
-			}
-			setLoading(false)
-		},
+		onSubmit: async ({ email, password }) => sendLogin({ email, password }),
 	})
 	const debouncedSetFieldValue = useDebouncedCallback(
 		(fieldName: string, fieldValue: string) => {
@@ -84,6 +59,18 @@ export default function SignIn() {
 		},
 		100
 	)
+
+	useEffect(() => {
+		if (loginData) {
+			if (loginData.status === "success") {
+				dispatch(login(loginData.data))
+			} else {
+				setReqError(
+					loginData.errors[0]?.message || "An unknown error occurred"
+				)
+			}
+		}
+	})
 
 	useEffect(() => {
 		if (user) {
@@ -151,9 +138,23 @@ export default function SignIn() {
 					/>
 					<FormErrorMessage>{errors.password}</FormErrorMessage>
 				</FormControl>
-				<Button m={5} isDisabled={loading} onClick={() => submitForm()}>
+				<Button
+					m={5}
+					isDisabled={loginLoading}
+					onClick={() => submitForm()}
+				>
 					Login
 				</Button>
+				<Divider m={2} />
+				<Text>
+					Forgot your password? Reset it{" "}
+					<Link
+						href="/user/passwordreset"
+						style={{ textDecoration: "underline" }}
+					>
+						here
+					</Link>
+				</Text>
 			</Center>
 		</Container>
 	)
