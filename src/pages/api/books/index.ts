@@ -29,3 +29,7 @@ handler.get<ApiRequest<{ Query: GET_Base_query }>>(
 )
 
 export default handler
+
+export const config = {
+	runtime: "edge",
+}

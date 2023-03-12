@@ -1,6 +1,6 @@
 // Prisma database connection
 
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient } from "@prisma/client/edge"
 const IS_PROD = process.env.NODE_ENV === "production"
 
 /**

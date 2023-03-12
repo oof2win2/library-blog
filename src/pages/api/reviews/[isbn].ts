@@ -129,3 +129,7 @@ handler.put<ApiRequest<{ Body: PUT_ISBN_body; Query: PUT_ISBN_query }>>(
 )
 
 export default handler
+
+export const config = {
+	runtime: "edge",
+}
