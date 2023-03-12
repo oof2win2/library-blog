@@ -1,4 +1,4 @@
-/// <reference path="../src/types.d.ts" />
+//// <reference path="../src/types.d.ts" />
 
 import { PrismaClient } from "@prisma/client"
 import fs from "fs/promises"

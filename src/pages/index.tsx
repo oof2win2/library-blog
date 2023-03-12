@@ -1,10 +1,13 @@
 import { Container } from "@chakra-ui/react"
-import ReviewRow from "../components/BookRow/BookRow"
+import ReviewRow from "@/components/BookRow"
+import { NextPage } from "next"
 
-export default function Home() {
+const Home: NextPage = () => {
 	return (
 		<Container maxW="160ch">
 			<ReviewRow length={20} />
 		</Container>
 	)
 }
+
+export default Home
