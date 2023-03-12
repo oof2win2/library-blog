@@ -8,5 +8,7 @@ const ENV = cleanEnv(process.env, {
 	}),
 	MEILISEARCH_ADMIN_KEY: str({ desc: "MeiliSearch admin key" }),
 	NEXT_PUBLIC_MEILISEARCH_URL: str({ desc: "MeiliSearch URL" }),
+	EMAIL_USERNAME: str({ desc: "Email username" }),
+	EMAIL_PASSWORD: str({ desc: "Email password" }),
 })
 export default ENV

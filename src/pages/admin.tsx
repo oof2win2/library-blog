@@ -151,7 +151,6 @@ export default function Admin(
 
 	useEffect(() => {
 		if (addAllowedDomainData) {
-			console.log(addAllowedDomainData)
 			if (addAllowedDomainData.status === "success") {
 				setAllowedDomains([
 					...allowedDomains,
@@ -465,11 +464,8 @@ export const getServerSideProps: GetServerSideProps<AdminProps> = async (
 		props: {
 			admins: admins.map((admin) => {
 				return {
-					id: admin.id,
-					name: admin.name,
-					email: admin.email,
-					authLevel: admin.authLevel,
-					reviewAmount: admin.reviewAmount,
+					...admin,
+					password: null,
 				}
 			}),
 			allowedDomains: allowedDomains.map((domain) => domain.domain),

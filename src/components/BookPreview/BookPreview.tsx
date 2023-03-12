@@ -46,8 +46,6 @@ const ReviewPreview = ({ book, loading, error }: Props) => {
 					</Box>
 					<Center
 						style={{
-							// maxWidth: "50%",
-							// maxHeight: "50%",
 							position: "relative",
 							minHeight: 300,
 						}}
@@ -67,7 +65,6 @@ const ReviewPreview = ({ book, loading, error }: Props) => {
 							/>
 						)}
 					</Center>
-					{/* <CardFooter>ISBN {review?.isbn || "Unknown"}</CardFooter> */}
 				</Stack>
 			</CardBody>
 		</Card>

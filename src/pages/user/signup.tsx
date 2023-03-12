@@ -14,13 +14,11 @@ import { useFormik } from "formik"
 import { SignupForm, SignupFormType } from "@/utils/validators/UserForms"
 import { toFormikValidationSchema } from "zod-formik-adapter"
 import { useDebouncedCallback } from "use-debounce"
-import { useAppDispatch, useAppSelector } from "@/utils/redux/hooks"
+import { useAppSelector } from "@/utils/redux/hooks"
 import { useRouter } from "next/router"
-import { login } from "@/utils/redux/parts/user"
 import useSWRMutation from "swr/mutation"
 
 export default function SignUp() {
-	const dispatch = useAppDispatch()
 	const { user } = useAppSelector((state) => state.user)
 	const router = useRouter()
 	const [error, setError] = useState<string | null>(null)
@@ -63,9 +61,7 @@ export default function SignUp() {
 
 	useEffect(() => {
 		if (signupData) {
-			if (signupData.status === "success") {
-				dispatch(login(signupData.data))
-			} else {
+			if (signupData.status !== "success") {
 				setError(signupData.message)
 			}
 		}
@@ -75,14 +71,17 @@ export default function SignUp() {
 		if (user) {
 			router.push("/")
 		}
-	}, [user])
+	}, [])
 
-	if (user) {
+	if (signupData && signupData.status === "success") {
 		return (
 			<Container maxW="60ch">
 				<Center flexDir="column">
-					<Heading m={5}>Login</Heading>
-					<Text>You will be redirected to the homepage soon</Text>
+					<Heading m={5}>Signup</Heading>
+					<Text>
+						Please check your email and verify it by clicking on the
+						link
+					</Text>
 				</Center>
 			</Container>
 		)

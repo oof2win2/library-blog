@@ -18,7 +18,12 @@ export default function RequireAuth({
 					<Heading>You must be logged in to view this page</Heading>
 					<Text>
 						You can log in{" "}
-						<NextLink href="/user/login">here</NextLink>
+						<NextLink
+							href="/user/login"
+							style={{ textDecoration: "underline" }}
+						>
+							here
+						</NextLink>
 					</Text>
 				</Center>
 			</Container>
@@ -32,8 +37,14 @@ export default function RequireAuth({
 					</Heading>
 					<Text>
 						You can try logging in again{" "}
-						<NextLink href="/user/login">here</NextLink>, or contact
-						an administrator if you believe this is an error
+						<NextLink
+							href="/user/login"
+							style={{ textDecoration: "underline" }}
+						>
+							here
+						</NextLink>
+						, or contact an administrator if you believe this is an
+						error
 					</Text>
 				</Center>
 			</Container>

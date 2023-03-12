@@ -24,7 +24,7 @@ export default function authAPI(
 				description: "You must be logged in to access this resource.",
 			})
 		}
-		console.log(sessionData.user.authLevel, permissions)
+
 		if (sessionData.user.authLevel < permissions) {
 			return res.status(401).json({
 				status: "error",

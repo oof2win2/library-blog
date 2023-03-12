@@ -13,12 +13,14 @@ const handler = nc<ApiRequest, NextApiResponse>()
 handler.post<ApiRequest<{ Body: LoginFormType }>>(
 	apiValidation({ body: LoginForm }),
 	async (req, res) => {
-		//   const { email, password } = req.body as LoginFormType;
-		const { email, password } = req.body
+		const { email, password } = req.body as LoginFormType
 
 		const user = await db.user.findUnique({
 			where: {
 				email,
+			},
+			include: {
+				userVerification: true,
 			},
 		})
 
@@ -31,6 +33,19 @@ handler.post<ApiRequest<{ Body: LoginFormType }>>(
 						statusCode: 404,
 						message: "Email or password is wrong",
 						description: "Email or password is wrong",
+					},
+				],
+			})
+		}
+		if (user.userVerification !== null) {
+			return res.status(404).json({
+				status: "error",
+				errors: [
+					{
+						status: "error",
+						statusCode: 404,
+						message: "Please verify your email",
+						description: "Please verify your email",
 					},
 				],
 			})
