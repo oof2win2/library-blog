@@ -13,8 +13,7 @@ const handler = nc<ApiRequest, NextApiResponse>()
 handler.post<ApiRequest<{ Body: LoginFormType }>>(
 	apiValidation({ body: LoginForm }),
 	async (req, res) => {
-		//   const { email, password } = req.body as LoginFormType;
-		const { email, password } = req.body
+		const { email, password } = req.body as LoginFormType
 
 		const user = await db.user.findUnique({
 			where: {
