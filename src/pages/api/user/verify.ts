@@ -4,6 +4,7 @@ import { NextApiResponse } from "next"
 import nc from "next-connect"
 import { db } from "@/utils/db"
 import { z } from "zod"
+import { saveSessionData } from "@/utils/auth"
 
 const handler = nc<ApiRequest, NextApiResponse>()
 
@@ -45,11 +46,11 @@ handler.post<ApiRequest>(
 			},
 		})
 
+		await saveSessionData(res, userVerification.User, null)
+
 		return res.status(200).json({
 			status: "success",
-			data: {
-				user: userVerification.User,
-			},
+			data: userVerification.User,
 		})
 	}
 )

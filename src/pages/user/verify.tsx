@@ -45,7 +45,7 @@ export default function SignUp() {
 	useEffect(() => {
 		if (verifyData) {
 			if (verifyData.status === "success") {
-				dispatch(login(verifyData.data.user))
+				dispatch(login(verifyData.data))
 				setTimeout(() => {
 					router.push("/")
 				}, 2000)
