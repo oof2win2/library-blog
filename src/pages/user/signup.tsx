@@ -63,9 +63,7 @@ export default function SignUp() {
 
 	useEffect(() => {
 		if (signupData) {
-			if (signupData.status === "success") {
-				dispatch(login(signupData.data))
-			} else {
+			if (signupData.status !== "success") {
 				setError(signupData.message)
 			}
 		}
@@ -75,14 +73,17 @@ export default function SignUp() {
 		if (user) {
 			router.push("/")
 		}
-	}, [user])
+	}, [])
 
-	if (user) {
+	if (signupData && signupData.status === "success") {
 		return (
 			<Container maxW="60ch">
 				<Center flexDir="column">
-					<Heading m={5}>Login</Heading>
-					<Text>You will be redirected to the homepage soon</Text>
+					<Heading m={5}>Signup</Heading>
+					<Text>
+						Please check your email and verify it by clicking on the
+						link
+					</Text>
 				</Center>
 			</Container>
 		)

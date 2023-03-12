@@ -5,7 +5,8 @@ import nc from "next-connect"
 import { db } from "@/utils/db"
 import { SignupForm, SignupFormType } from "@/utils/validators/UserForms"
 import bcrypt from "bcryptjs"
-import { saveSessionData } from "@/utils/auth"
+import cryptoRandomString from "crypto-random-string"
+import { sendVerificationEmail } from "@/utils/mail"
 
 const handler = nc<ApiRequest, NextApiResponse>()
 
@@ -42,19 +43,26 @@ handler.post<ApiRequest<{ Body: SignupFormType }>>(
 			})
 		}
 
+		const verificationToken = cryptoRandomString({ length: 64 })
+
 		const user = await db.user.create({
 			data: {
 				email,
 				password: await bcrypt.hash(password, 10),
 				name,
+				userVerification: {
+					create: {
+						email,
+						token: verificationToken,
+					},
+				},
 			},
 		})
 
-		await saveSessionData(res, user, null)
+		await sendVerificationEmail(user, verificationToken)
 
 		return res.status(200).json({
 			status: "success",
-			data: user,
 		})
 	}
 )

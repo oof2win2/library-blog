@@ -63,6 +63,10 @@ export default function SignIn() {
 								"Email address or password is wrong, please try again"
 							)
 							break
+						case "Please verify your email":
+							setReqError(
+								"Please verify your email address before logging in"
+							)
 						default:
 							setReqError("An unknown error occured")
 					}

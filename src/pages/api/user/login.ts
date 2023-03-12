@@ -35,6 +35,19 @@ handler.post<ApiRequest<{ Body: LoginFormType }>>(
 				],
 			})
 		}
+		if (user.userVerificationId !== null) {
+			return res.status(404).json({
+				status: "error",
+				errors: [
+					{
+						status: "error",
+						statusCode: 404,
+						message: "Please verify your email",
+						description: "Please verify your email",
+					},
+				],
+			})
+		}
 
 		const passwordMatch = await bcrypt.compare(password, user.password)
 
