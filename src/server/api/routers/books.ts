@@ -2,7 +2,7 @@ import { z } from "zod"
 
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc"
 
-export const bookRouter = createTRPCRouter({
+const bookRouter = createTRPCRouter({
 	getCount: publicProcedure
 		.input(z.number().min(0).max(1000).optional().default(20))
 		.query(async ({ ctx, input }) => {
@@ -18,3 +18,5 @@ export const bookRouter = createTRPCRouter({
 		})
 	}),
 })
+
+export default bookRouter

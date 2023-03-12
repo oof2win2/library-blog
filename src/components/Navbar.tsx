@@ -87,13 +87,15 @@ const Navbar = () => {
 	const borderColor = useColorModeValue("gray.200", "gray.700")
 
 	useEffect(() => {
-		if (searchTerm) {
-			bookIndex.search(searchTerm).then((data) => {
+		const run = async () => {
+			if (searchTerm) {
+				const data = await bookIndex.search(searchTerm)
 				setSearchResults(data.hits as SearchBookType[])
-			})
-		} else {
-			setSearchResults([])
+			} else {
+				setSearchResults([])
+			}
 		}
+		run()
 	}, [searchTerm])
 
 	const pages: Page[] = [...initialPages]

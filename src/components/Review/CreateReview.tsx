@@ -1,4 +1,3 @@
-import { useAppSelector } from "@/utils/redux/hooks"
 import { ReviewForm, ReviewFormType } from "@/utils/validators/ReviewForms"
 import {
 	HStack,
@@ -21,6 +20,7 @@ import { toFormikValidationSchema } from "zod-formik-adapter"
 import { IoStarOutline, IoStar } from "react-icons/io5"
 import { useDebouncedCallback } from "use-debounce"
 import { Review } from "@prisma/client"
+import { useUserStore } from "@/utils/zustand"
 
 function StarRating({ onChange }: { onChange: (value: number) => void }) {
 	const [rating, setRating] = useState(5)
@@ -59,16 +59,16 @@ function StarRating({ onChange }: { onChange: (value: number) => void }) {
 
 interface CreateReviewParams {
 	isbn: string
-	addReview: (review: Review) => void
+	onCreate: () => void
 }
 
-const CreateReview = ({ isbn, addReview }: CreateReviewParams) => {
+const CreateReview = ({ isbn, onCreate }: CreateReviewParams) => {
 	const toast = useToast()
 	const [isLargerThan800] = useMediaQuery("(min-width: 800px)", {
 		ssr: true,
 		fallback: true, // return false on the server, and re-evaluate on the client side
 	})
-	const { user } = useAppSelector((state) => state.user)
+	const user = useUserStore().user
 
 	const { setFieldValue, submitForm, errors } = useFormik<ReviewFormType>({
 		initialValues: {
@@ -96,7 +96,7 @@ const CreateReview = ({ isbn, addReview }: CreateReviewParams) => {
 					description: "Your review has been created",
 					status: "success",
 				})
-				addReview(res.data.review)
+				// addReview(res.data.review)
 			} else {
 				toast({
 					title: "Error",

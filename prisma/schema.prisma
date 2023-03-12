@@ -1,6 +1,7 @@
 datasource db {
     provider     = "mysql"
     url          = env("DATABASE_URL")
+    directUrl    = env("DATABASE_DIRECT_URL")
     relationMode = "prisma"
 }
 
@@ -34,7 +35,7 @@ model Review {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    Book      Book?    @relation(fields: [isbn], references: [isbn])
+    Book      Book     @relation(fields: [isbn], references: [isbn])
 
     @@unique([isbn, reviewAuthorId]) // isbn and reviewAuthorId must be unique together
     @@index([reviewAuthorId])
