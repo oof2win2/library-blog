@@ -151,7 +151,6 @@ export default function Admin(
 
 	useEffect(() => {
 		if (addAllowedDomainData) {
-			console.log(addAllowedDomainData)
 			if (addAllowedDomainData.status === "success") {
 				setAllowedDomains([
 					...allowedDomains,

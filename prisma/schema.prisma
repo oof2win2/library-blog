@@ -49,12 +49,8 @@ model User {
     authLevel    Int      @default(0) // by default, users are not admins
     reviews      Review[]
 
-    userVerification   UserVerification? @relation(fields: [userVerificationId], references: [id])
-    passwordReset      PasswordReset?    @relation(fields: [passwordResetId], references: [id])
-    userVerificationId Int?              @unique
-    passwordResetId    Int?              @unique
-
-    @@index([userVerificationId])
+    userVerification UserVerification?
+    passwordReset    PasswordReset?
 }
 
 model UserVerification {
@@ -64,8 +60,8 @@ model UserVerification {
     createdAt DateTime @default(now())
     expiresAt DateTime @default(dbgenerated("(NOW() + INTERVAL '3' DAY)"))
 
-    User   User? @relation()
-    userId Int?
+    User   User @relation(fields: [userId], references: [id])
+    userId Int  @unique
 }
 
 model PasswordReset {
@@ -75,8 +71,8 @@ model PasswordReset {
     createdAt DateTime @default(now())
     expiresAt DateTime @default(dbgenerated("(NOW() + INTERVAL '3' DAY)"))
 
-    User   User? @relation()
-    userId Int?
+    User   User @relation(fields: [userId], references: [id])
+    userId Int  @unique
 }
 
 model Session {

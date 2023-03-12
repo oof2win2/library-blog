@@ -38,9 +38,6 @@ export const User = z.object({
 	name: z.string(),
 	reviewAmount: z.number(),
 	authLevel: z.number(),
-
-	userVerificationId: z.number().nullable(),
-	passwordResetId: z.number().nullable(),
 })
 export type User = z.infer<typeof User>
 

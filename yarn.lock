@@ -4971,7 +4971,6 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.54.0
     bcryptjs: ^2.4.3
     crypto-random-string: ^5.0.0
-    dotenv: ^16.0.3
     envalid: ^7.3.1
     eslint: 8.33.0
     eslint-config-next: 13.1.6
@@ -5852,7 +5851,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^16.0.0, dotenv@npm:^16.0.3":
+"dotenv@npm:^16.0.0":
   version: 16.0.3
   resolution: "dotenv@npm:16.0.3"
   checksum: afcf03f373d7a6d62c7e9afea6328e62851d627a4e73f2e12d0a8deae1cd375892004f3021883f8aec85932cd2834b091f568ced92b4774625b321db83b827f8

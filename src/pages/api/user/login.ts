@@ -19,6 +19,9 @@ handler.post<ApiRequest<{ Body: LoginFormType }>>(
 			where: {
 				email,
 			},
+			include: {
+				userVerification: true,
+			},
 		})
 
 		if (!user) {
@@ -34,7 +37,7 @@ handler.post<ApiRequest<{ Body: LoginFormType }>>(
 				],
 			})
 		}
-		if (user.userVerificationId !== null) {
+		if (user.userVerification !== null) {
 			return res.status(404).json({
 				status: "error",
 				errors: [

@@ -15,9 +15,9 @@ const transport = nodemailer.createTransport({
 
 export async function sendVerificationEmail(user: User, token: string) {
 	const verificationLink = `${
-		process.env.VERCEL_URL || "localhost:3000"
-	}/user/verify?token=${token}`
-	transport.sendMail({
+		process.env.VERCEL_URL ? "https://" : "http://"
+	}${process.env.VERCEL_URL || "localhost:3000"}/user/verify?token=${token}`
+	await transport.sendMail({
 		to: user.email,
 		from: ENV.EMAIL_USERNAME,
 		subject: "Bookaholic Blurbs: Verify your email",
@@ -40,4 +40,16 @@ export async function notifyNewReview(
 			text,
 		})
 	}
+}
+
+export async function sendPasswordReset(user: User, token: string) {
+	const resetLink = `${process.env.VERCEL_URL ? "https://" : "http://"}${
+		process.env.VERCEL_URL || "localhost:3000"
+	}/user/passwordreset/new?token=${token}`
+	await transport.sendMail({
+		to: user.email,
+		from: ENV.EMAIL_USERNAME,
+		subject: "Bookaholic Blurbs: Reset your password",
+		text: `Hello ${user.name},\n\nPlease reset your password by clicking the following link:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.\n\nRegards,\nBookaholic Blurbs`,
+	})
 }

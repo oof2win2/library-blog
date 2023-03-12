@@ -36,7 +36,6 @@ export default function SignUp() {
 	)
 
 	useEffect(() => {
-		console.log(router.query)
 		if (router.query.token) {
 			sendVerify(router.query.token as string)
 		}

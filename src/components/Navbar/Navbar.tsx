@@ -193,9 +193,9 @@ const Navbar = () => {
 							<SearchIcon />
 						</IconButton>
 						{pages.map((page) => (
-							<Button key={page.title}>
-								<Link href={page.href}>{page.title}</Link>
-							</Button>
+							<Link href={page.href} key={page.href}>
+								<Button>{page.title}</Button>
+							</Link>
 						))}
 					</ButtonGroup>
 					<IconButton

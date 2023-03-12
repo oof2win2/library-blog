@@ -27,7 +27,6 @@ export default function SignIn() {
 	const { user } = useAppSelector((state) => state.user)
 	const router = useRouter()
 	const [reqError, setReqError] = useState<string | null>(null)
-	const [resetPassword, setResetPassword] = useState(false)
 	const {
 		trigger: sendLogin,
 		data: loginData,
@@ -64,13 +63,16 @@ export default function SignIn() {
 		if (loginData) {
 			if (loginData.status === "success") {
 				dispatch(login(loginData.data))
+				setTimeout(() => {
+					router.push("/")
+				}, 2000)
 			} else {
 				setReqError(
 					loginData.errors[0]?.message || "An unknown error occurred"
 				)
 			}
 		}
-	})
+	}, [loginData])
 
 	useEffect(() => {
 		if (user) {
