@@ -9,6 +9,7 @@ import {
 	PUT_ISBN_query,
 } from "./index.types"
 import { db } from "@/utils/db"
+import { notifyNewReview } from "@/utils/mail"
 
 const handler = nc<ApiRequest, NextApiResponse>()
 
@@ -104,6 +105,19 @@ handler.put<ApiRequest<{ Body: PUT_ISBN_body; Query: PUT_ISBN_query }>>(
 				threeWords: body.threeWords,
 			},
 		})
+
+		const book = await db.book.findUnique({
+			where: {
+				isbn: req.query.isbn,
+			},
+		})
+		const admins = await db.user.findMany({
+			where: {
+				authLevel: UserAuthLevel.Admin,
+			},
+		})
+
+		notifyNewReview(book, review, req.user, admins)
 
 		return res.status(200).json({
 			status: "success",
