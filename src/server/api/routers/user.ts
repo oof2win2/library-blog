@@ -4,7 +4,9 @@ import { userProtectedProcedure } from "@/server/api/auth"
 import { UserAuthLevel } from "@/utils/types"
 import bcrypt from "bcryptjs"
 import { TRPCError } from "@trpc/server"
-import { clearSessionData } from "@/server/authHandlers"
+import { clearSessionData, saveSessionData } from "@/server/authHandlers"
+import cryptoRandomString from "crypto-random-string"
+import { sendPasswordReset, sendVerificationEmail } from "@/server/mail"
 
 const userRouter = createTRPCRouter({
 	login: publicProcedure
@@ -40,6 +42,124 @@ const userRouter = createTRPCRouter({
 	logout: publicProcedure.mutation(async ({ ctx }) => {
 		await clearSessionData(ctx.req, ctx.res)
 	}),
+
+	signup: publicProcedure
+		.input(
+			z.object({
+				email: z.string().email(),
+				password: z.string().min(8),
+				name: z.string().min(1),
+			})
+		)
+		.mutation(async ({ ctx, input }) => {
+			const foundUser = await ctx.prisma.user.findUnique({
+				where: {
+					email: input.email,
+				},
+			})
+			if (foundUser)
+				throw new TRPCError({
+					code: "CONFLICT",
+					message: "Email already in use",
+				})
+
+			const allowedDomains = await ctx.prisma.allowedDomain.findMany()
+			const isAllowedDomain = allowedDomains.find((d) => {
+				if (input.email.endsWith(d.domain)) {
+					return true
+				}
+			})
+			if (!isAllowedDomain)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "This email domain is not allowed",
+				})
+
+			const verificationToken = cryptoRandomString({ length: 64 })
+			const user = await ctx.prisma.user.create({
+				data: {
+					email: input.email,
+					password: await bcrypt.hash(input.password, 10),
+					name: input.name,
+					userVerification: {
+						create: {
+							email: input.email,
+							token: verificationToken,
+						},
+					},
+				},
+			})
+
+			await sendVerificationEmail(user, verificationToken)
+		}),
+
+	verify: publicProcedure
+		.input(z.string())
+		.mutation(async ({ ctx, input }) => {
+			const userVerification =
+				await ctx.prisma.userVerification.findUnique({
+					where: {
+						token: input,
+					},
+					include: {
+						User: true,
+					},
+				})
+			if (!userVerification) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Invalid verification token",
+				})
+			}
+
+			await ctx.prisma.user.update({
+				where: {
+					id: userVerification.User.id,
+				},
+				data: {
+					userVerification: {
+						delete: true,
+					},
+				},
+			})
+
+			await saveSessionData(ctx.res, userVerification.User, null)
+
+			return userVerification.User
+		}),
+
+	requestPasswordReset: publicProcedure
+		.input(z.string().email())
+		.mutation(async ({ ctx, input }) => {
+			const foundUser = await ctx.prisma.user.findUnique({
+				where: {
+					email: input,
+				},
+			})
+
+			// if there isnt a user, we send a success message to prevent email enumeration
+			if (!foundUser) return
+
+			const passwordResetToken = cryptoRandomString({ length: 64 })
+			const user = await ctx.prisma.user.update({
+				where: {
+					email: input,
+				},
+				data: {
+					passwordReset: {
+						create: {
+							email: input,
+							token: passwordResetToken,
+						},
+					},
+				},
+			})
+
+			// now we send an email to the user
+			await sendPasswordReset(user, passwordResetToken)
+
+			return
+		}),
 })
 
 export default userRouter

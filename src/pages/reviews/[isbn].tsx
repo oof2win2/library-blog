@@ -23,7 +23,7 @@ import getSingleParam from "@/utils/getSingleParam"
 import { api } from "@/utils/api"
 
 export default function BookPage() {
-	const user = useUserStore().user
+	const user = useUserStore((store) => store.user)
 
 	const router = useRouter()
 	const isbn = getSingleParam(router.query, "isbn")

@@ -13,6 +13,7 @@ const server = z.object({
   EMAIL_USERNAME: z.string(),
   EMAIL_PASSWORD: z.string(),
   NEXT_PUBLIC_MEILISEARCH_URL: z.string().url(),
+  SENDGRID_API_KEY: z.string(),
 });
 
 /**
@@ -40,6 +41,7 @@ const processEnv = {
   EMAIL_PASSWORD: process.env.EMAIL_PASSWORD,
   NEXT_PUBLIC_MEILISEARCH_URL: process.env.NEXT_PUBLIC_MEILISEARCH_URL,
   NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY: process.env.NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY,
+  SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
 };
 
 // Don't touch the part below

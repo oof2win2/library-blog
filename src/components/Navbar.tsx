@@ -78,7 +78,7 @@ const Navbar = () => {
 	const [mobileIsOpen, setMobileIsOpen] = useState(false)
 	const { colorMode, toggleColorMode } = useColorMode()
 	const isDark = colorMode === "dark"
-	const user = useUserStore().user
+	const user = useUserStore((store) => store.user)
 	const [searchIsOpen, setSearchIsOpen] = useState(false)
 	const [currentSearchTerm, setCurrentSearchTerm] = useState("")
 	const [searchTerm] = useDebounce(currentSearchTerm, 200)

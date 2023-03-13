@@ -68,7 +68,7 @@ const CreateReview = ({ isbn, onCreate }: CreateReviewParams) => {
 		ssr: true,
 		fallback: true, // return false on the server, and re-evaluate on the client side
 	})
-	const user = useUserStore().user
+	const user = useUserStore((store) => store.user)
 
 	const { setFieldValue, submitForm, errors } = useFormik<ReviewFormType>({
 		initialValues: {
