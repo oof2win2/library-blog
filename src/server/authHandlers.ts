@@ -158,7 +158,6 @@ export async function clearSessionData(
 	} catch {
 		return null
 	}
-	console.log(valid)
 
 	await prisma.session
 		.delete({

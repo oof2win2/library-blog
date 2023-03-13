@@ -1,4 +1,3 @@
-import { GetServerSidePropsContext } from "next"
 import {
 	Container,
 	Divider,
@@ -14,7 +13,7 @@ import { Book, Review, User } from "@prisma/client"
 import NextImage from "next/image"
 import { useEffect, useState } from "react"
 import ReviewComponent from "@/components/Review/Review"
-// import CreateReviewComponent from "@/components/Review/CreateReview"
+import CreateReviewComponent from "@/components/Review/CreateReview"
 import StarRating from "@/components/StarRating"
 import { useUserStore } from "@/utils/zustand"
 import { UserAuthLevel } from "@/utils/types"
@@ -24,10 +23,16 @@ import { api } from "@/utils/api"
 
 export default function BookPage() {
 	const user = useUserStore((store) => store.user)
-
 	const router = useRouter()
-	const isbn = getSingleParam(router.query, "isbn")
-	const bookData = api.reviews.getBookReviewData.useQuery(isbn || "")
+	// we can assert the isbn as it is a required param
+	const bookData = api.reviews.getBookReviewData.useQuery(
+		getSingleParam(router.query, "isbn")!,
+		{
+			refetchOnWindowFocus: false,
+			// dont fetch on server
+			enabled: getSingleParam(router.query, "isbn") !== null,
+		}
+	)
 	const book = bookData.data
 	// we need to ensure that if a user is logged in and they posted a review, that review is at the top of the list
 	// so we sort the reviews by the reviewAuthorId, and if the user is logged in, we put the user's review at the top
@@ -102,14 +107,16 @@ export default function BookPage() {
 			</Stack>
 			<Divider m={2} />
 			<Stack spacing="4">
-				{/* {!userHasReview && (
+				{!userHasReview && (
 					<StackItem>
 						<CreateReviewComponent
 							isbn={book.isbn}
-							onSuccess={() => bookData.refetch()}
+							onSuccess={() => {
+								bookData.refetch()
+							}}
 						/>
 					</StackItem>
-				)} */}
+				)}
 				{reviews.map((review) => {
 					const author = review.reviewAuthor
 					// the logged in user is the author of this review
@@ -123,7 +130,9 @@ export default function BookPage() {
 								review={review}
 								author={author}
 								editable={editable}
-								onRemove={() => bookData.refetch()}
+								onRemove={() => {
+									bookData.refetch()
+								}}
 							/>
 						</StackItem>
 					)

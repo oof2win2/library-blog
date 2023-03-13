@@ -35,6 +35,8 @@ const userRouter = createTRPCRouter({
 				})
 			}
 
+			await saveSessionData(ctx.res, user, null)
+
 			return {
 				user,
 			}
@@ -193,6 +195,8 @@ const userRouter = createTRPCRouter({
 					},
 				},
 			})
+
+			await saveSessionData(ctx.res, user, null)
 
 			return user
 		}),

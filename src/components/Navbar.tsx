@@ -85,6 +85,7 @@ const Navbar = () => {
 	const bookIndex = meiliSearchClient.index("book")
 	const [searchResults, setSearchResults] = useState<SearchBookType[]>([])
 	const borderColor = useColorModeValue("gray.200", "gray.700")
+	const [pages, setPages] = useState<Page[]>([])
 
 	useEffect(() => {
 		const run = async () => {
@@ -98,17 +99,19 @@ const Navbar = () => {
 		run()
 	}, [searchTerm])
 
-	const pages: Page[] = [...initialPages]
+	useEffect(() => {
+		const pg: Page[] = [...initialPages]
+		if (user) {
+			if (user.authLevel === UserAuthLevel.Admin) {
+				pg.push(AdminPanel)
+			}
 
-	if (user) {
-		if (user.authLevel === UserAuthLevel.Admin) {
-			pages.push(AdminPanel)
+			pg.push(...LoggedIn)
+		} else {
+			pg.push(...LoggedOut)
 		}
-
-		pages.push(...LoggedIn)
-	} else {
-		pages.push(...LoggedOut)
-	}
+		setPages(pg)
+	}, [user])
 
 	return (
 		<Flex alignItems="center" width="100%" padding="20px 10px 20px 10px">
