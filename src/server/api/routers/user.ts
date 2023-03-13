@@ -160,6 +160,42 @@ const userRouter = createTRPCRouter({
 
 			return
 		}),
+
+	resetPassword: publicProcedure
+		.input(
+			z.object({
+				token: z.string(),
+				password: z.string().min(8),
+			})
+		)
+		.mutation(async ({ ctx, input }) => {
+			const foundPasswordReset =
+				await ctx.prisma.passwordReset.findUnique({
+					where: {
+						token: input.token,
+					},
+				})
+
+			if (!foundPasswordReset)
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Invalid password reset token",
+				})
+
+			const user = await ctx.prisma.user.update({
+				where: {
+					id: foundPasswordReset.userId,
+				},
+				data: {
+					password: bcrypt.hashSync(input.password),
+					passwordReset: {
+						delete: true,
+					},
+				},
+			})
+
+			return user
+		}),
 })
 
 export default userRouter
