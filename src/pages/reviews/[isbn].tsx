@@ -26,12 +26,7 @@ export default function BookPage() {
 	const router = useRouter()
 	// we can assert the isbn as it is a required param
 	const bookData = api.reviews.getBookReviewData.useQuery(
-		getSingleParam(router.query, "isbn")!,
-		{
-			refetchOnWindowFocus: false,
-			// dont fetch on server
-			enabled: getSingleParam(router.query, "isbn") !== null,
-		}
+		getSingleParam(router.query, "isbn")!
 	)
 	const book = bookData.data
 	// we need to ensure that if a user is logged in and they posted a review, that review is at the top of the list
@@ -43,13 +38,6 @@ export default function BookPage() {
 			return 1
 		}) || []
 	const authors = reviews.map((review) => review.reviewAuthor)
-
-	if (bookData.isFetching)
-		return (
-			<Container maxW="80ch">
-				<Heading>Loading...</Heading>
-			</Container>
-		)
 
 	if (!book)
 		return (

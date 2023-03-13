@@ -42,5 +42,7 @@ export const EditAdminUser = z.object({
 })
 export type EditAdminUserType = z.infer<typeof EditAdminUser>
 
-// export const EditAllowedDomain = PUT_AllowedDomains_Body
-// export type EditAllowedDomainType = z.infer<typeof EditAllowedDomain>
+export const EditAllowedDomain = z.object({
+	domain: z.string(),
+})
+export type EditAllowedDomainType = z.infer<typeof EditAllowedDomain>

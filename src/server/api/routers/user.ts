@@ -1,6 +1,9 @@
 import { z } from "zod"
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc"
-import { userProtectedProcedure } from "@/server/api/auth"
+import {
+	adminProtectedProcedure,
+	userProtectedProcedure,
+} from "@/server/api/auth"
 import { UserAuthLevel } from "@/utils/types"
 import bcrypt from "bcryptjs"
 import { TRPCError } from "@trpc/server"
@@ -199,6 +202,94 @@ const userRouter = createTRPCRouter({
 			await saveSessionData(ctx.res, user, null)
 
 			return user
+		}),
+
+	getAdmins: adminProtectedProcedure.query(async ({ ctx }) => {
+		const users = await ctx.prisma.user.findMany({
+			where: {
+				authLevel: UserAuthLevel.Admin,
+			},
+		})
+		return users
+	}),
+
+	promoteAdmin: adminProtectedProcedure
+		.input(z.string().email())
+		.mutation(async ({ ctx, input }) => {
+			try {
+				const user = await ctx.prisma.user.update({
+					where: {
+						email: input,
+					},
+					data: {
+						authLevel: UserAuthLevel.Admin,
+					},
+				})
+
+				return user
+			} catch {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "User not found",
+				})
+			}
+		}),
+	demoteAdmin: adminProtectedProcedure
+		.input(z.string().email())
+		.mutation(async ({ ctx, input }) => {
+			try {
+				const user = await ctx.prisma.user.update({
+					where: {
+						email: input,
+					},
+					data: {
+						authLevel: UserAuthLevel.User,
+					},
+				})
+				return user
+			} catch {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "User not found",
+				})
+			}
+		}),
+
+	getAllowedDomains: adminProtectedProcedure.query(async ({ ctx }) => {
+		const domains = await ctx.prisma.allowedDomain.findMany()
+		return domains
+	}),
+	addAllowedDomain: adminProtectedProcedure
+		.input(z.string())
+		.mutation(async ({ ctx, input }) => {
+			try {
+				await ctx.prisma.allowedDomain.create({
+					data: {
+						domain: input,
+					},
+				})
+			} catch {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Domain already exists",
+				})
+			}
+		}),
+	removeAllowedDomain: adminProtectedProcedure
+		.input(z.string())
+		.mutation(async ({ ctx, input }) => {
+			try {
+				await ctx.prisma.allowedDomain.delete({
+					where: {
+						domain: input,
+					},
+				})
+			} catch {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Domain not found",
+				})
+			}
 		}),
 })
 
