@@ -5,10 +5,18 @@ import {
 	userProtectedProcedure,
 } from "@/server/api/auth"
 import { UserAuthLevel } from "@/utils/types"
-import bcrypt from "bcryptjs"
 import { TRPCError } from "@trpc/server"
 import { clearSessionData, saveSessionData } from "@/server/authHandlers"
 import { sendPasswordReset, sendVerificationEmail } from "@/server/mail"
+let bcrypt: typeof import("bcryptjs")
+// @ts-expect-error - we are running in a vercel edge function
+if (typeof EdgeRuntime === "string") {
+	// we are running in a vercel edge function
+	// @ts-expect-error stupid import error
+	bcrypt = await import("bcryptjs/dist/bcrypt")
+} else {
+	bcrypt = await import("bcryptjs")
+}
 
 const userRouter = createTRPCRouter({
 	login: publicProcedure
