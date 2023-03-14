@@ -1,60 +1,45 @@
-import {
-	Button,
-	Center,
-	Container,
-	FormControl,
-	FormErrorMessage,
-	FormLabel,
-	Heading,
-	Input,
-	Text,
-} from "@chakra-ui/react"
-import { useEffect, useState } from "react"
-import { useFormik } from "formik"
-import { SignupForm, SignupFormType } from "@/utils/validators/UserForms"
-import { toFormikValidationSchema } from "zod-formik-adapter"
-import { useDebouncedCallback } from "use-debounce"
-import { useAppDispatch, useAppSelector } from "@/utils/redux/hooks"
+import { Center, Container, Heading, Text, useToast } from "@chakra-ui/react"
+import { useEffect } from "react"
 import { useRouter } from "next/router"
-import { login } from "@/utils/redux/parts/user"
-import useSWRMutation from "swr/mutation"
+import { api } from "@/utils/api"
+import { useUserStore } from "@/utils/zustand"
 
 export default function SignUp() {
-	const dispatch = useAppDispatch()
+	const toast = useToast()
 	const router = useRouter()
-	const [error, setError] = useState<string | null>(null)
-	const { trigger: sendVerify, data: verifyData } = useSWRMutation(
-		"/api/user/verify",
-		async (url, { arg }: { arg: string }) => {
-			const qs = new URLSearchParams()
-			qs.set("token", arg)
-			const x = await fetch(`${url}?${qs}`, {
-				method: "POST",
-			})
-			return await x.json()
-		}
-	)
+	const login = useUserStore((store) => store.login)
+	const verifyMutation = api.user.verify.useMutation()
 
 	useEffect(() => {
 		if (router.query.token) {
-			sendVerify(router.query.token as string)
+			verifyMutation.mutate(router.query.token as string)
 		}
 	}, [])
 
 	useEffect(() => {
-		if (verifyData) {
-			if (verifyData.status === "success") {
-				dispatch(login(verifyData.data))
-				setTimeout(() => {
-					router.push("/")
-				}, 2000)
-			} else {
-				setError(verifyData.message)
-			}
+		if (verifyMutation.status === "success") {
+			setTimeout(() => {
+				router.push("/")
+			}, 2000)
+			login(verifyMutation.data)
+			toast({
+				title: "Email verified",
+				description: "You are now logged in",
+				status: "success",
+			})
 		}
-	}, [verifyData])
+	}, [verifyMutation.status, verifyMutation.data])
+	useEffect(() => {
+		if (verifyMutation.status === "error") {
+			toast({
+				title: "Error",
+				description: verifyMutation.error?.message,
+				status: "error",
+			})
+		}
+	}, [verifyMutation.status, verifyMutation.error])
 
-	if (verifyData && verifyData.status === "success") {
+	if (verifyMutation.status === "success") {
 		return (
 			<Container maxW="60ch">
 				<Center flexDir="column">
@@ -72,7 +57,7 @@ export default function SignUp() {
 		<Container maxW="60ch">
 			<Center flexDir="column">
 				<Heading m={5}>Email Verification</Heading>
-				<Text>{error && `Error: ${error}`}</Text>
+				<Text>Loading...</Text>
 			</Center>
 		</Container>
 	)

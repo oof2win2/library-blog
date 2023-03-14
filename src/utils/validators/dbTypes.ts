@@ -1,5 +1,4 @@
 import { z } from "zod"
-import validator from "validator"
 
 export const Post = z.object({
 	id: z.number(),
@@ -12,20 +11,8 @@ export const Post = z.object({
 	smallThumbnail: z.string().optional(),
 	largeThumbnail: z.string().optional(),
 	postAuthorId: z.number(),
-	createdAt: z.union([
-		z
-			.string()
-			.refine((x) => validator.isISO8601(x), "Invalid date provided")
-			.transform((x) => new Date(x)),
-		z.date(),
-	]),
-	updatedAt: z.union([
-		z
-			.string()
-			.refine((x) => validator.isISO8601(x), "Invalid date provided")
-			.transform((x) => new Date(x)),
-		z.date(),
-	]),
+	createdAt: z.date(),
+	updatedAt: z.date(),
 })
 export type Post = z.infer<typeof Post>
 

@@ -1,28 +1,24 @@
 import { Center, Container, Heading, Text } from "@chakra-ui/react"
 import { useEffect } from "react"
-import { useAppDispatch, useAppSelector } from "@/utils/redux/hooks"
 import { useRouter } from "next/router"
-import { logout } from "@/utils/redux/parts/user"
+import { useUserStore } from "@/utils/zustand"
+import { api } from "@/utils/api"
 
 export default function SignIn() {
-	const dispatch = useAppDispatch()
-	const { user } = useAppSelector((state) => state.user)
+	const { user, logout } = useUserStore()
 	const router = useRouter()
+	const logoutMutation = api.user.logout.useMutation()
+
 	useEffect(() => {
-		const logoutUser = async () => {
-			const res = await fetch("/api/user/logout", {
-				method: "POST",
-			})
-			if (res.status === 200) {
-				dispatch(logout())
-			}
-		}
-		logoutUser()
-	})
+		logoutMutation.mutate()
+	}, [])
 	useEffect(() => {
-		if (!user) {
-			router.push("/")
+		if (logoutMutation.status === "success") {
+			logout()
 		}
+	}, [logoutMutation.status, logoutMutation.isLoading])
+	useEffect(() => {
+		if (!user) setTimeout(() => router.push("/"), 2000)
 	}, [user])
 
 	if (user) {

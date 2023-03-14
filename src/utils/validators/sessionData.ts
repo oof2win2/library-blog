@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { User } from "./dbTypes"
+import { User } from "@/utils/validators/dbTypes"
 
 // JWT cookie session data
 export const SessionData = z.object({

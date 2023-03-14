@@ -1,7 +1,3 @@
-import {
-	PUT_AllowedDomains_Body,
-	PUT_ManageBooks_Body,
-} from "@/pages/api/admins/index.types"
 import { z } from "zod"
 
 export const SignupForm = z.object({
@@ -46,8 +42,12 @@ export const EditAdminUser = z.object({
 })
 export type EditAdminUserType = z.infer<typeof EditAdminUser>
 
-export const EditAllowedDomain = PUT_AllowedDomains_Body
+export const EditAllowedDomain = z.object({
+	domain: z.string(),
+})
 export type EditAllowedDomainType = z.infer<typeof EditAllowedDomain>
 
-export const EditBook = PUT_ManageBooks_Body
+export const EditBook = z.object({
+	isbn: z.string(),
+})
 export type EditBookType = z.infer<typeof EditBook>

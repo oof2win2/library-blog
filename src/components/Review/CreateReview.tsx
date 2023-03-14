@@ -1,4 +1,3 @@
-import { useAppSelector } from "@/utils/redux/hooks"
 import { ReviewForm, ReviewFormType } from "@/utils/validators/ReviewForms"
 import {
 	HStack,
@@ -16,10 +15,12 @@ import {
 	useToast,
 } from "@chakra-ui/react"
 import { useFormik } from "formik"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toFormikValidationSchema } from "zod-formik-adapter"
 import { IoStarOutline, IoStar } from "react-icons/io5"
 import { useDebouncedCallback } from "use-debounce"
+import { useUserStore } from "@/utils/zustand"
+import { api } from "@/utils/api"
 import { Review } from "@prisma/client"
 
 function StarRating({ onChange }: { onChange: (value: number) => void }) {
@@ -59,16 +60,17 @@ function StarRating({ onChange }: { onChange: (value: number) => void }) {
 
 interface CreateReviewParams {
 	isbn: string
-	addReview: (review: Review) => void
+	onSuccess: () => void
 }
 
-const CreateReview = ({ isbn, addReview }: CreateReviewParams) => {
+const CreateReview = ({ isbn, onSuccess }: CreateReviewParams) => {
 	const toast = useToast()
 	const [isLargerThan800] = useMediaQuery("(min-width: 800px)", {
 		ssr: true,
 		fallback: true, // return false on the server, and re-evaluate on the client side
 	})
-	const { user } = useAppSelector((state) => state.user)
+	const user = useUserStore((store) => store.user)
+	const createReviewMutation = api.reviews.createReview.useMutation()
 
 	const { setFieldValue, submitForm, errors } = useFormik<ReviewFormType>({
 		initialValues: {
@@ -79,33 +81,34 @@ const CreateReview = ({ isbn, addReview }: CreateReviewParams) => {
 		},
 		validationSchema: toFormikValidationSchema(ReviewForm),
 		onSubmit: async (data) => {
-			const res = await fetch(`/api/reviews/${isbn}`, {
-				method: "PUT",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					rating: data.rating,
-					reviewText: data.reviewText,
-					threeWords: data.threeWords,
-				}),
-			}).then((x) => x.json())
-			if (res.status === "success") {
-				toast({
-					title: "Review created",
-					description: "Your review has been created",
-					status: "success",
-				})
-				addReview(res.data.review)
-			} else {
-				toast({
-					title: "Error",
-					description: "An error occurred",
-					status: "error",
-				})
-			}
+			createReviewMutation.mutate({
+				reviewText: data.reviewText,
+				threeWords: data.threeWords,
+				rating: data.rating,
+				isbn: data.isbn,
+			})
 		},
 	})
+
+	useEffect(() => {
+		if (createReviewMutation.status === "success") {
+			onSuccess()
+			toast({
+				title: "Review created",
+				description: "Your review has been created",
+				status: "success",
+			})
+		}
+	}, [createReviewMutation.status, createReviewMutation.data])
+	useEffect(() => {
+		if (createReviewMutation.status === "error") {
+			toast({
+				title: "Error creating review",
+				description: createReviewMutation.error?.message,
+				status: "error",
+			})
+		}
+	}, [createReviewMutation.status, createReviewMutation.error])
 
 	const debouncedSetFieldValue = useDebouncedCallback(
 		(fieldName: string, fieldValue: string) => {

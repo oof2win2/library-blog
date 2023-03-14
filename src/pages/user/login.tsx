@@ -9,48 +9,35 @@ import {
 	Heading,
 	Input,
 	Text,
+	useToast,
 } from "@chakra-ui/react"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useFormik } from "formik"
 import { LoginForm } from "@/utils/validators/UserForms"
 import type { LoginFormType } from "@/utils/validators/UserForms"
 import { toFormikValidationSchema } from "zod-formik-adapter"
 import { useDebouncedCallback } from "use-debounce"
-import { useAppDispatch, useAppSelector } from "@/utils/redux/hooks"
+import { useUserStore } from "@/utils/zustand"
+import { api } from "@/utils/api"
 import { useRouter } from "next/router"
-import { login } from "@/utils/redux/parts/user"
-import useSWRMutation from "swr/mutation"
 
 export default function SignIn() {
-	const dispatch = useAppDispatch()
-	const { user } = useAppSelector((state) => state.user)
+	const toast = useToast()
+	const { user, login } = useUserStore()
 	const router = useRouter()
-	const [reqError, setReqError] = useState<string | null>(null)
-	const {
-		trigger: sendLogin,
-		data: loginData,
-		isMutating: loginLoading,
-	} = useSWRMutation(
-		"/api/user/login",
-		async (url, { arg }: { arg: { email: string; password: string } }) => {
-			const x = await fetch(url, {
-				method: "POST",
-				body: JSON.stringify(arg),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			})
-			return await x.json()
-		}
-	)
+
+	const loginMutation = api.user.login.useMutation()
+
 	const { setFieldValue, submitForm, errors } = useFormik<LoginFormType>({
 		initialValues: {
 			email: "",
 			password: "",
 		},
 		validationSchema: toFormikValidationSchema(LoginForm),
-		onSubmit: async ({ email, password }) => sendLogin({ email, password }),
+		onSubmit: async ({ email, password }) => {
+			loginMutation.mutate({ email, password })
+		},
 	})
 	const debouncedSetFieldValue = useDebouncedCallback(
 		(fieldName: string, fieldValue: string) => {
@@ -60,19 +47,29 @@ export default function SignIn() {
 	)
 
 	useEffect(() => {
-		if (loginData) {
-			if (loginData.status === "success") {
-				dispatch(login(loginData.data))
-				setTimeout(() => {
-					router.push("/")
-				}, 2000)
-			} else {
-				setReqError(
-					loginData.errors[0]?.message || "An unknown error occurred"
-				)
-			}
+		if (loginMutation.status === "success") {
+			login(loginMutation.data.user)
+			setTimeout(() => router.push("/"), 2000)
 		}
-	}, [loginData])
+	}, [loginMutation.data, loginMutation.status])
+
+	useEffect(() => {
+		if (loginMutation.status === "error" && loginMutation.error.data) {
+			if (loginMutation.error.data.code === "NOT_FOUND")
+				toast({
+					title: "Invalid credentials",
+					description:
+						"The email or password you entered is incorrect",
+					status: "error",
+				})
+			else
+				toast({
+					title: "An error occurred",
+					description: "Please try again later",
+					status: "error",
+				})
+		}
+	}, [loginMutation.error, loginMutation.status])
 
 	useEffect(() => {
 		if (user) {
@@ -104,8 +101,6 @@ export default function SignIn() {
 						Sign up here
 					</Link>
 				</Text>
-
-				<Text>{reqError}</Text>
 
 				<FormControl
 					isInvalid={Boolean(errors.email)}
@@ -142,7 +137,7 @@ export default function SignIn() {
 				</FormControl>
 				<Button
 					m={5}
-					isDisabled={loginLoading}
+					isDisabled={loginMutation.isLoading}
 					onClick={() => submitForm()}
 				>
 					Login

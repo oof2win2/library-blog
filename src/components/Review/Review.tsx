@@ -21,18 +21,18 @@ import { DeleteIcon } from "@chakra-ui/icons"
 import { Review, User } from "@prisma/client"
 import StarRating from "@/components/StarRating"
 import { useEffect, useRef, useState } from "react"
-import useSWRMutation from "swr/mutation"
+import { api } from "@/utils/api"
 
 export default function ReviewComponent({
 	review,
 	author,
 	editable = false,
-	removeReview,
+	onRemove,
 }: {
 	review: Review
 	author: Omit<User, "email" | "password">
 	editable?: boolean
-	removeReview: (reviewAuthorId: number) => void
+	onRemove: () => void
 }) {
 	const toast = useToast()
 	const [isLargerThan800] = useMediaQuery("(min-width: 800px)", {
@@ -41,30 +41,19 @@ export default function ReviewComponent({
 	})
 	const [deleteWindow, setDeleteWindow] = useState(false)
 	const deleteCancelRef = useRef<HTMLButtonElement>(null)
-	const { trigger: deleteReview, data: deleteReviewData } = useSWRMutation(
-		"/api/reviews",
-		async (url, { arg }: { arg: string }) => {
-			const qs = new URLSearchParams()
-			qs.set("reviewAuthorId", review.reviewAuthorId.toString())
-			return fetch(`${url}/${arg}?${qs.toString()}`, {
-				method: "DELETE",
-			}).then((res) => res.json())
-		}
-	)
+	const removeReview = api.reviews.deleteReview.useMutation()
 
 	// remove the review from the page when it's deleted
 	useEffect(() => {
-		if (deleteReviewData) {
-			if (deleteReviewData.status === "success") {
-				toast({
-					title: "Review deleted",
-					status: "success",
-					isClosable: true,
-				})
-				removeReview(review.reviewAuthorId)
-			}
+		if (removeReview.status === "success") {
+			toast({
+				title: "Review deleted",
+				status: "success",
+				isClosable: true,
+			})
+			onRemove()
 		}
-	}, [deleteReviewData])
+	}, [removeReview.status])
 
 	return (
 		<Card maxW="70ch" padding="4">
@@ -96,7 +85,9 @@ export default function ReviewComponent({
 								colorScheme="red"
 								onClick={() => {
 									setDeleteWindow(false)
-									deleteReview(review.isbn)
+									removeReview.mutate({
+										isbn: review.isbn,
+									})
 								}}
 								ml={3}
 							>

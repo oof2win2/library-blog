@@ -1,5 +1,3 @@
-import { getSessionData } from "@/utils/auth"
-import { db } from "@/utils/db"
 import { UserAuthLevel } from "@/utils/types"
 import {
 	EditAdminUser,
@@ -35,179 +33,130 @@ import { Formik } from "formik"
 import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { useEffect, useRef, useState } from "react"
 import { toFormikValidationSchema } from "zod-formik-adapter"
-import useSWRMutation from "swr/mutation"
 import { DeleteIcon } from "@chakra-ui/icons"
+import { useUserStore } from "@/utils/zustand"
+import { api } from "@/utils/api"
+import { useRouter } from "next/router"
 
-interface AdminProps {
-	admins: Omit<User, "password">[]
-	allowedDomains: string[]
-}
-
-export default function Admin(
-	props: InferGetServerSidePropsType<typeof getServerSideProps>
-) {
+export default function Admin() {
 	const toast = useToast()
-	const [admins, setAdmins] = useState(props.admins)
-	const [allowedDomains, setAllowedDomains] = useState(props.allowedDomains)
-	const [adminToRemove, setAdminToRemove] = useState("")
-	const deleteCancelRef = useRef(null)
-	const { trigger: promoteAdmin, data: promoteAdminData } = useSWRMutation(
-		"/api/admins",
-		(url, { arg }: { arg: string }) =>
-			fetch(`${url}`, {
-				method: "PUT",
-				body: JSON.stringify({
-					email: arg,
-				}),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			}).then((res) => res.json())
-	)
-	const { trigger: demoteAdmin, data: demoteAdminData } = useSWRMutation(
-		"/api/admins",
-		(url, { arg }: { arg: string }) =>
-			fetch(`${url}`, {
-				method: "DELETE",
-				body: JSON.stringify({
-					email: arg,
-				}),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			}).then((res) => res.json())
-	)
-	const { trigger: addAllowedDomain, data: addAllowedDomainData } =
-		useSWRMutation(
-			"/api/admins/allowed-domains",
-			(url, { arg }: { arg: string }) =>
-				fetch(url, {
-					method: "PUT",
-					body: JSON.stringify({ domain: arg }),
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}).then((res) => res.json())
-		)
-	const { trigger: removeAllowedDomain, data: removeAllowedDomainData } =
-		useSWRMutation(
-			"/api/admins/allowed-domains",
-			(url, { arg }: { arg: string }) =>
-				fetch(url, {
-					method: "DELETE",
-					body: JSON.stringify({ domain: arg }),
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}).then((res) => res.json())
-		)
-	const { trigger: addBook, data: addBookData } = useSWRMutation(
-		"/api/admins/manage-books",
-		(url, { arg }: { arg: string }) =>
-			fetch(url, {
-				method: "PUT",
-				body: JSON.stringify({ isbn: arg }),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			}).then((x) => x.json())
-	)
-	const { trigger: removeBook, data: removeBookData } = useSWRMutation(
-		"/api/admins/manage-books",
-		(url, { arg }: { arg: string }) =>
-			fetch(url, {
-				method: "DELETE",
-				body: JSON.stringify({ isbn: arg }),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			}).then((x) => x.json())
-	)
+	const user = useUserStore((state) => state.user)
+	const router = useRouter()
+
+	const getAdminsQuery = api.user.getAdmins.useQuery()
+	const promoteAdminMutation = api.user.promoteAdmin.useMutation()
+	const demoteAdminMutation = api.user.demoteAdmin.useMutation()
+	const [adminToDemote, setAdminToDemote] = useState("")
+	const demoteAdminCancelRef = useRef<HTMLButtonElement>(null)
+
+	const getAllowedDomainsQuery = api.user.getAllowedDomains.useQuery()
+	const addAllowedDomainMutation = api.user.addAllowedDomain.useMutation()
+	const removeAllowedDomainMutation =
+		api.user.removeAllowedDomain.useMutation()
+	const [domainToRemove, setDomainToRemove] = useState("")
+	const removeDomainCancelRef = useRef<HTMLButtonElement>(null)
+
+	const addBookMutation = api.books.addBook.useMutation()
+	const removeBookMutation = api.books.removeBook.useMutation()
 
 	useEffect(() => {
-		if (demoteAdminData) {
-			if (demoteAdminData.status === "success") {
-				setAdmins(
-					admins.filter(
-						(admin) => admin.id !== demoteAdminData.data.userId
-					)
-				)
-			} else {
-				toast({
-					title: "Error removing admin",
-					description: demoteAdminData.message,
-					status: "error",
-				})
-			}
+		if (!user || user.authLevel !== UserAuthLevel.Admin) {
+			router.push("/403")
 		}
-	}, [demoteAdminData])
-	useEffect(() => {
-		if (promoteAdminData) {
-			if (promoteAdminData.status === "success") {
-				setAdmins([...admins, promoteAdminData.data.user])
-			}
-		}
-	}, [promoteAdminData])
+	}, [user])
 
 	useEffect(() => {
-		if (addAllowedDomainData) {
-			if (addAllowedDomainData.status === "success") {
-				setAllowedDomains([
-					...allowedDomains,
-					addAllowedDomainData.data.domain,
-				])
-			}
-		}
-	}, [addAllowedDomainData])
+		if (promoteAdminMutation.status === "success") {
+			toast({
+				title: "Admin promoted",
+				status: "success",
+			})
+			getAdminsQuery.refetch()
+		} else if (promoteAdminMutation.status === "error")
+			toast({
+				title: "Error promoting admin",
+				status: "error",
+				description: promoteAdminMutation.error?.message,
+			})
+	}, [promoteAdminMutation.status])
 	useEffect(() => {
-		if (removeAllowedDomainData) {
-			if (removeAllowedDomainData.status === "success") {
-				setAllowedDomains(
-					allowedDomains.filter(
-						(domain) =>
-							domain !== removeAllowedDomainData.data.domain
-					)
-				)
-			}
-		}
-	}, [removeAllowedDomainData])
+		if (demoteAdminMutation.status === "success") {
+			toast({
+				title: "Admin demoted",
+				status: "success",
+			})
+			getAdminsQuery.refetch()
+		} else if (demoteAdminMutation.status === "error")
+			toast({
+				title: "Error demoting admin",
+				status: "error",
+				description: demoteAdminMutation.error?.message,
+			})
+	}, [demoteAdminMutation.status])
 
 	useEffect(() => {
-		if (addBookData) {
-			if (addBookData.status === "success") {
-				toast({
-					title: "Book added",
-					description: "Book added successfully",
-					status: "success",
-				})
-			} else {
-				toast({
-					title: "Error adding book",
-					description: addBookData.message,
-					status: "error",
-				})
-			}
-		}
-	}, [addBookData])
+		if (addAllowedDomainMutation.status === "success") {
+			toast({
+				title: "Domain added",
+				status: "success",
+			})
+			getAllowedDomainsQuery.refetch()
+		} else if (addAllowedDomainMutation.status === "error")
+			toast({
+				title: "Error adding domain",
+				status: "error",
+				description: addAllowedDomainMutation.error?.message,
+			})
+	}, [addAllowedDomainMutation.status])
 	useEffect(() => {
-		if (removeBookData) {
-			if (removeBookData.status === "success") {
-				toast({
-					title: "Book removed",
-					description: "Book removed successfully",
-					status: "success",
-				})
-			}
-		}
-	}, [removeBookData])
+		if (removeAllowedDomainMutation.status === "success") {
+			toast({
+				title: "Domain removed",
+				status: "success",
+			})
+			getAllowedDomainsQuery.refetch()
+		} else if (removeAllowedDomainMutation.status === "error")
+			toast({
+				title: "Error removing domain",
+				status: "error",
+				description: removeAllowedDomainMutation.error?.message,
+			})
+	}, [removeAllowedDomainMutation.status])
+
+	useEffect(() => {
+		if (addBookMutation.status === "success") {
+			toast({
+				title: "Book added",
+				status: "success",
+			})
+		} else if (addBookMutation.status === "error")
+			toast({
+				title: "Error adding book",
+				status: "error",
+				description: addBookMutation.error?.message,
+			})
+	}, [addBookMutation.status])
+	useEffect(() => {
+		if (removeBookMutation.status === "success") {
+			toast({
+				title: "Book removed",
+				status: "success",
+			})
+		} else if (removeBookMutation.status === "error")
+			toast({
+				title: "Error removing book",
+				status: "error",
+				description: removeBookMutation.error?.message,
+			})
+	}, [removeBookMutation.status])
 
 	return (
 		<Container maxW="80ch">
-			{/* demote admin alert dialog */}
+			{/* admin remove dialog */}
 			<AlertDialog
-				isOpen={adminToRemove !== ""}
-				leastDestructiveRef={deleteCancelRef}
-				onClose={() => setAdminToRemove("")}
+				isOpen={adminToDemote !== ""}
+				leastDestructiveRef={demoteAdminCancelRef}
+				onClose={() => setAdminToDemote("")}
 			>
 				<AlertDialogOverlay>
 					<AlertDialogContent>
@@ -222,17 +171,61 @@ export default function Admin(
 
 						<AlertDialogFooter>
 							<Button
-								ref={deleteCancelRef}
-								onClick={() => setAdminToRemove("")}
+								ref={demoteAdminCancelRef}
+								onClick={() => setAdminToDemote("")}
 							>
 								Cancel
 							</Button>
 							<Button
 								colorScheme="red"
 								onClick={() => {
-									if (adminToRemove)
-										demoteAdmin(adminToRemove)
-									setAdminToRemove("")
+									if (adminToDemote)
+										demoteAdminMutation.mutate(
+											adminToDemote
+										)
+									setAdminToDemote("")
+								}}
+								ml={3}
+							>
+								Delete
+							</Button>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialogOverlay>
+			</AlertDialog>
+
+			{/* remove domain dialog */}
+			<AlertDialog
+				isOpen={domainToRemove !== ""}
+				leastDestructiveRef={removeDomainCancelRef}
+				onClose={() => setDomainToRemove("")}
+			>
+				<AlertDialogOverlay>
+					<AlertDialogContent>
+						<AlertDialogHeader fontSize="lg" fontWeight="bold">
+							Remove domain
+						</AlertDialogHeader>
+
+						<AlertDialogBody>
+							Are you sure? You can&apos;t undo this action
+							afterwards.
+						</AlertDialogBody>
+
+						<AlertDialogFooter>
+							<Button
+								ref={demoteAdminCancelRef}
+								onClick={() => setDomainToRemove("")}
+							>
+								Cancel
+							</Button>
+							<Button
+								colorScheme="red"
+								onClick={() => {
+									if (domainToRemove)
+										removeAllowedDomainMutation.mutate(
+											domainToRemove
+										)
+									setDomainToRemove("")
 								}}
 								ml={3}
 							>
@@ -248,19 +241,19 @@ export default function Admin(
 				<Table variant="simple">
 					<Thead>
 						<Tr>
-							<Th>Nameeeee</Th>
+							<Th>Name</Th>
 							<Th>Email</Th>
 						</Tr>
 					</Thead>
 					<Tbody>
-						{admins.map((admin) => (
+						{getAdminsQuery.data?.map((admin) => (
 							<Tr key={admin.id}>
 								<Th>{admin.name}</Th>
 								<Th>{admin.email}</Th>
 								<Th>
 									<IconButton
 										onClick={() => {
-											setAdminToRemove(admin.email)
+											setAdminToDemote(admin.email)
 										}}
 										aria-label="Delete admin"
 									>
@@ -276,7 +269,7 @@ export default function Admin(
 			<Formik
 				initialValues={{ email: "" }}
 				validationSchema={toFormikValidationSchema(EditAdminUser)}
-				onSubmit={(values) => promoteAdmin(values.email)}
+				onSubmit={(values) => promoteAdminMutation.mutate(values.email)}
 			>
 				{(props) => (
 					<form onSubmit={props.handleSubmit}>
@@ -314,9 +307,19 @@ export default function Admin(
 						</Tr>
 					</Thead>
 					<Tbody>
-						{props.allowedDomains.map((domain) => (
-							<Tr key={domain}>
-								<Th>{domain}</Th>
+						{getAllowedDomainsQuery.data?.map((domain) => (
+							<Tr key={domain.id}>
+								<Th>{domain.domain}</Th>
+								<Th>
+									<IconButton
+										onClick={() => {
+											setDomainToRemove(domain.domain)
+										}}
+										aria-label="Delete allowed domain"
+									>
+										<DeleteIcon />
+									</IconButton>
+								</Th>
 							</Tr>
 						))}
 					</Tbody>
@@ -326,36 +329,9 @@ export default function Admin(
 			<Formik
 				initialValues={{ domain: "" }}
 				validationSchema={toFormikValidationSchema(EditAllowedDomain)}
-				onSubmit={(values) => addAllowedDomain(values.domain)}
-			>
-				{(props) => (
-					<form onSubmit={props.handleSubmit}>
-						<FormControl
-							isRequired
-							isInvalid={Boolean(props.errors.domain)}
-						>
-							<FormLabel>
-								The ending of the domain (after the @ symbol)
-							</FormLabel>
-							<Input
-								onChange={props.handleChange}
-								onBlur={props.handleBlur}
-								name="domain"
-								placeholder="parklane-is.com"
-							/>
-							<FormErrorMessage>
-								{props.errors.domain}
-							</FormErrorMessage>
-						</FormControl>
-						<Button type="submit">Submit</Button>
-					</form>
-				)}
-			</Formik>
-			<Heading size="md">Remove allowed domain</Heading>
-			<Formik
-				initialValues={{ domain: "" }}
-				validationSchema={toFormikValidationSchema(EditAllowedDomain)}
-				onSubmit={(values) => removeAllowedDomain(values.domain)}
+				onSubmit={(values) =>
+					addAllowedDomainMutation.mutate(values.domain)
+				}
 			>
 				{(props) => (
 					<form onSubmit={props.handleSubmit}>
@@ -383,12 +359,11 @@ export default function Admin(
 
 			<Divider m={4} />
 
-			<Heading>Books</Heading>
-			<Heading size="md">Add book</Heading>
+			<Heading>Add books</Heading>
 			<Formik
 				initialValues={{ isbn: "" }}
 				validationSchema={toFormikValidationSchema(EditBook)}
-				onSubmit={(values) => addBook(values.isbn)}
+				onSubmit={(values) => addBookMutation.mutate(values.isbn)}
 			>
 				{(props) => (
 					<form onSubmit={props.handleSubmit}>
@@ -401,7 +376,7 @@ export default function Admin(
 								onChange={props.handleChange}
 								onBlur={props.handleBlur}
 								name="isbn"
-								placeholder="978-1-56619-909-4"
+								placeholder="9781442414495"
 							/>
 							<FormErrorMessage>
 								{props.errors.isbn}
@@ -411,11 +386,12 @@ export default function Admin(
 					</form>
 				)}
 			</Formik>
-			<Heading size="md">Remove book</Heading>
+
+			<Heading>Remove books</Heading>
 			<Formik
 				initialValues={{ isbn: "" }}
 				validationSchema={toFormikValidationSchema(EditBook)}
-				onSubmit={(values) => removeBook(values.isbn)}
+				onSubmit={(values) => removeBookMutation.mutate(values.isbn)}
 			>
 				{(props) => (
 					<form onSubmit={props.handleSubmit}>
@@ -428,7 +404,7 @@ export default function Admin(
 								onChange={props.handleChange}
 								onBlur={props.handleBlur}
 								name="isbn"
-								placeholder="978-1-56619-909-4"
+								placeholder="9781442414495"
 							/>
 							<FormErrorMessage>
 								{props.errors.isbn}
@@ -440,35 +416,4 @@ export default function Admin(
 			</Formik>
 		</Container>
 	)
-}
-
-export const getServerSideProps: GetServerSideProps<AdminProps> = async (
-	context
-) => {
-	const sessionData = await getSessionData(context.req.cookies)
-	if (!sessionData || sessionData.user.authLevel !== UserAuthLevel.Admin)
-		return {
-			redirect: {
-				destination: "/403",
-				permanent: false,
-			},
-		}
-
-	const admins = await db.user.findMany({
-		where: {
-			authLevel: UserAuthLevel.Admin,
-		},
-	})
-	const allowedDomains = await db.allowedDomain.findMany()
-	return {
-		props: {
-			admins: admins.map((admin) => {
-				return {
-					...admin,
-					password: null,
-				}
-			}),
-			allowedDomains: allowedDomains.map((domain) => domain.domain),
-		},
-	}
 }

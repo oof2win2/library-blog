@@ -8,6 +8,7 @@ import {
 	FormControl,
 	FormLabel,
 	FormErrorMessage,
+	useToast,
 } from "@chakra-ui/react"
 import Link from "next/link"
 import { useEffect } from "react"
@@ -15,27 +16,16 @@ import { useFormik } from "formik"
 import { PasswordResetRequestForm } from "@/utils/validators/UserForms"
 import type { PasswordResetRequestFormType } from "@/utils/validators/UserForms"
 import { toFormikValidationSchema } from "zod-formik-adapter"
-import { useAppDispatch, useAppSelector } from "@/utils/redux/hooks"
 import { useRouter } from "next/router"
-import useSWRMutation from "swr/mutation"
+import { api } from "@/utils/api"
+import { useUserStore } from "@/utils/zustand"
 
 export default function PasswordReset() {
-	const dispatch = useAppDispatch()
-	const { user } = useAppSelector((state) => state.user)
+	const { user } = useUserStore()
+	const toast = useToast()
 	const router = useRouter()
-	const { trigger: sendResetRequest, data: resetRequest } = useSWRMutation(
-		"/api/user/passwordreset",
-		async (url, { arg }: { arg: { email: string } }) => {
-			const x = await fetch(url, {
-				method: "PUT",
-				body: JSON.stringify(arg),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			})
-			return await x.json()
-		}
-	)
+	const passwordResetMutation = api.user.requestPasswordReset.useMutation()
+
 	const { setFieldValue, submitForm, errors } =
 		useFormik<PasswordResetRequestFormType>({
 			initialValues: {
@@ -44,7 +34,7 @@ export default function PasswordReset() {
 			validationSchema: toFormikValidationSchema(
 				PasswordResetRequestForm
 			),
-			onSubmit: async ({ email }) => sendResetRequest({ email }),
+			onSubmit: async ({ email }) => passwordResetMutation.mutate(email),
 		})
 
 	useEffect(() => {
@@ -52,8 +42,25 @@ export default function PasswordReset() {
 			router.push("/")
 		}
 	}, [])
+	useEffect(() => {
+		if (passwordResetMutation.status === "success") {
+			toast({
+				title: "Password Reset",
+				description:
+					"Please check your email and click the link to reset your password",
+				status: "success",
+			})
+		} else if (passwordResetMutation.status === "error") {
+			toast({
+				title: "Password Reset",
+				description:
+					"An error occurred while trying to reset your password",
+				status: "error",
+			})
+		}
+	}, [passwordResetMutation.status])
 
-	if (resetRequest?.status === "success") {
+	if (passwordResetMutation.status === "success") {
 		return (
 			<Container maxW="60ch">
 				<Center flexDir="column">
@@ -65,7 +72,7 @@ export default function PasswordReset() {
 				</Center>
 			</Container>
 		)
-	} else if (resetRequest?.status === "error") {
+	} else if (passwordResetMutation.status === "error") {
 		return (
 			<Container maxW="60ch">
 				<Center flexDir="column">

@@ -1,7 +1,7 @@
-import { PUT_ISBN_body } from "@/pages/api/reviews/index.types"
+import { CreateReviewForm } from "@/server/api/validators/reviews"
 import { z } from "zod"
 
-export const ReviewForm = PUT_ISBN_body.extend({
+export const ReviewForm = CreateReviewForm.extend({
 	isbn: z.string().length(13),
 })
 export type ReviewFormType = z.infer<typeof ReviewForm>

@@ -8,6 +8,7 @@ import {
 	FormControl,
 	FormLabel,
 	FormErrorMessage,
+	useToast,
 } from "@chakra-ui/react"
 import Link from "next/link"
 import { useEffect } from "react"
@@ -15,41 +16,16 @@ import { useFormik } from "formik"
 import { PasswordResetForm } from "@/utils/validators/UserForms"
 import type { PasswordResetFormType } from "@/utils/validators/UserForms"
 import { toFormikValidationSchema } from "zod-formik-adapter"
-import { useAppDispatch, useAppSelector } from "@/utils/redux/hooks"
 import { useRouter } from "next/router"
-import useSWRMutation from "swr/mutation"
+import { useUserStore } from "@/utils/zustand"
+import { api } from "@/utils/api"
 
 export default function PasswordReset() {
-	const { user } = useAppSelector((state) => state.user)
+	const { user, login } = useUserStore()
+	const toast = useToast()
 	const router = useRouter()
-	const {
-		trigger: resetPassword,
-		data: resetPasswordData,
-		isMutating: loading,
-	} = useSWRMutation(
-		"/api/user/passwordreset",
-		async (
-			url,
-			{
-				arg,
-			}: {
-				arg: {
-					password: string
-					passwordConfirm: string
-					token: string
-				}
-			}
-		) => {
-			const x = await fetch(url, {
-				method: "POST",
-				body: JSON.stringify(arg),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			})
-			return await x.json()
-		}
-	)
+	const resetPasswordMutation = api.user.resetPassword.useMutation()
+
 	const token = router.query.token
 		? Array.isArray(router.query.token)
 			? router.query.token[0]
@@ -65,7 +41,10 @@ export default function PasswordReset() {
 			},
 			validationSchema: toFormikValidationSchema(PasswordResetForm),
 			onSubmit: (data) => {
-				resetPassword(data)
+				resetPasswordMutation.mutate({
+					token: data.token,
+					password: data.password,
+				})
 			},
 		})
 	useEffect(() => {
@@ -76,6 +55,27 @@ export default function PasswordReset() {
 	useEffect(() => {
 		setFieldValue("token", token)
 	}, [token])
+
+	useEffect(() => {
+		if (resetPasswordMutation.status === "success") {
+			setTimeout(() => router.push("/"), 3000)
+			login(resetPasswordMutation.data)
+			toast({
+				title: "Password Reset",
+				description: "Your password has been successfully reset.",
+				status: "success",
+			})
+		}
+	}, [resetPasswordMutation.status, resetPasswordMutation.data])
+	useEffect(() => {
+		if (resetPasswordMutation.status === "error") {
+			toast({
+				title: "Error resetting password",
+				description: resetPasswordMutation.error?.message,
+				status: "error",
+			})
+		}
+	}, [resetPasswordMutation.status, resetPasswordMutation.error])
 
 	if (!token) {
 		return (
@@ -90,24 +90,19 @@ export default function PasswordReset() {
 		)
 	}
 
-	if (resetPasswordData?.status === "success") {
+	if (resetPasswordMutation.status === "success") {
 		return (
 			<Container maxW="60ch">
 				<Center flexDir="column">
 					<Heading m={5}>Password Reset</Heading>
 					<Text>
-						Your password has been successfully reset. You can now{" "}
-						<Link
-							href="/user/login"
-							style={{ textDecoration: "underline" }}
-						>
-							login
-						</Link>
+						Your password has been successfully reset. You have been
+						logged in and will be redirected to the home page soon.
 					</Text>
 				</Center>
 			</Container>
 		)
-	} else if (resetPasswordData?.status === "error") {
+	} else if (resetPasswordMutation.status === "error") {
 		return (
 			<Container maxW="60ch">
 				<Center flexDir="column">
@@ -159,7 +154,10 @@ export default function PasswordReset() {
 						{errors.passwordConfirm}
 					</FormErrorMessage>
 				</FormControl>
-				<Button onClick={() => submitForm()} isDisabled={loading}>
+				<Button
+					onClick={() => submitForm()}
+					isDisabled={resetPasswordMutation.isLoading}
+				>
 					Submit
 				</Button>
 			</Center>

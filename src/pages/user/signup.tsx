@@ -9,39 +9,20 @@ import {
 	Input,
 	Text,
 } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useFormik } from "formik"
 import { SignupForm, SignupFormType } from "@/utils/validators/UserForms"
 import { toFormikValidationSchema } from "zod-formik-adapter"
 import { useDebouncedCallback } from "use-debounce"
-import { useAppSelector } from "@/utils/redux/hooks"
 import { useRouter } from "next/router"
-import useSWRMutation from "swr/mutation"
+import { useUserStore } from "@/utils/zustand"
+import { api } from "@/utils/api"
 
 export default function SignUp() {
-	const { user } = useAppSelector((state) => state.user)
+	const user = useUserStore().user
 	const router = useRouter()
-	const [error, setError] = useState<string | null>(null)
-	const {
-		trigger: sendSignup,
-		data: signupData,
-		isMutating: loading,
-	} = useSWRMutation(
-		"/api/user/signup",
-		async (
-			url,
-			{ arg }: { arg: { email: string; password: string; name: string } }
-		) => {
-			const x = await fetch(url, {
-				method: "POST",
-				body: JSON.stringify(arg),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			})
-			return await x.json()
-		}
-	)
+	const signupMutation = api.user.signup.useMutation()
+
 	const { setFieldValue, submitForm, errors } = useFormik<SignupFormType>({
 		initialValues: {
 			email: "",
@@ -49,8 +30,8 @@ export default function SignUp() {
 			name: "",
 		},
 		validationSchema: toFormikValidationSchema(SignupForm),
-		onSubmit: async ({ email, password, name }) =>
-			sendSignup({ email, password, name }),
+		onSubmit: ({ email, password, name }) =>
+			signupMutation.mutate({ email, password, name }),
 	})
 	const debouncedSetFieldValue = useDebouncedCallback(
 		(fieldName: string, fieldValue: string) => {
@@ -60,20 +41,12 @@ export default function SignUp() {
 	)
 
 	useEffect(() => {
-		if (signupData) {
-			if (signupData.status !== "success") {
-				setError(signupData.message)
-			}
-		}
-	}, [signupData])
-
-	useEffect(() => {
 		if (user) {
 			router.push("/")
 		}
 	}, [])
 
-	if (signupData && signupData.status === "success") {
+	if (signupMutation.status === "success") {
 		return (
 			<Container maxW="60ch">
 				<Center flexDir="column">
@@ -91,7 +64,7 @@ export default function SignUp() {
 		<Container maxW="60ch">
 			<Center flexDir="column">
 				<Heading m={5}>Signup</Heading>
-				<Text>{error}</Text>
+				<Text>{signupMutation.error?.message}</Text>
 				<FormControl
 					isInvalid={Boolean(errors.email)}
 					isRequired
@@ -141,7 +114,11 @@ export default function SignUp() {
 					/>
 					<FormErrorMessage>{errors.name}</FormErrorMessage>
 				</FormControl>
-				<Button m={5} isDisabled={loading} onClick={() => submitForm()}>
+				<Button
+					m={5}
+					isDisabled={signupMutation.isLoading}
+					onClick={() => submitForm()}
+				>
 					Signup
 				</Button>
 			</Center>

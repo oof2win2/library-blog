@@ -1,17 +1,12 @@
-import React from "react"
-import Navbar from "@/components/Navbar/Navbar"
+import { type AppType } from "next/app"
+import { api } from "@/utils/api"
 import { ChakraProvider } from "@chakra-ui/react"
-import { AppProps } from "next/app"
+import Navbar from "@/components/Navbar"
 import Head from "next/head"
-import theme from "@/utils/chakraTheme"
-import { Provider } from "react-redux"
-import { PersistGate } from "redux-persist/integration/react"
-import { wrapper } from "@/utils/redux/store"
 
-function MyApp({ Component, ...rest }: AppProps) {
-	const { store, props } = wrapper.useWrappedStore(rest)
+const MyApp: AppType = ({ Component, pageProps }) => {
 	return (
-		<div>
+		<ChakraProvider>
 			<Head>
 				<meta
 					name="viewport"
@@ -19,17 +14,10 @@ function MyApp({ Component, ...rest }: AppProps) {
 				/>
 				<title>Bookaholic Blurbs</title>
 			</Head>
-			<Provider store={store}>
-				{/* @ts-expect-error __PERSISTOR is not default so ts will complain otherwise */}
-				<PersistGate persistor={store.__PERSISTOR}>
-					<ChakraProvider theme={theme}>
-						<Navbar />
-						<Component {...props.pageProps} />
-					</ChakraProvider>
-				</PersistGate>
-			</Provider>
-		</div>
+			<Navbar />
+			<Component {...pageProps} />
+		</ChakraProvider>
 	)
 }
-export default MyApp
-// export default wrapper.withRedux(MyApp);
+
+export default api.withTRPC(MyApp)
