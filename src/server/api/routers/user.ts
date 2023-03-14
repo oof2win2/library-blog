@@ -8,7 +8,7 @@ import { UserAuthLevel } from "@/utils/types"
 import { TRPCError } from "@trpc/server"
 import { clearSessionData, saveSessionData } from "@/server/authHandlers"
 import { sendPasswordReset, sendVerificationEmail } from "@/server/mail"
-let bcrypt: Promise<typeof import("bcryptjs")> = new Promise(() => {})
+let bcrypt: Promise<typeof import("bcryptjs")>
 // @ts-expect-error - we are running in a vercel edge function
 if (typeof EdgeRuntime === "string") {
 	// we are running in a vercel edge function
