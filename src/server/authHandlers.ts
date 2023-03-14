@@ -4,25 +4,27 @@ import * as jose from "jose"
 import { env } from "@/env.mjs"
 import { Session, User } from "@prisma/client"
 import { prisma } from "@/server/db"
+import {
+	RequestCookies,
+	ResponseCookies,
+} from "next/dist/compiled/@edge-runtime/cookies"
 
-const JWT_SECRET = Buffer.from(env.JWT_SECRET)
+const JWT_SECRET = new TextEncoder().encode(env.JWT_SECRET)
 
 /**
  * Get session
  */
 export async function getSessionData(
-	cookies: Partial<{
-		[key: string]: string
-	}>
+	cookies: RequestCookies
 ): Promise<null | SessionData> {
-	const cookie = cookies[env.COOKIE_NAME]
+	const cookie = cookies.get(env.COOKIE_NAME)
 	if (!cookie) return null
-	if (!cookie.startsWith("Bearer ")) return null
+	if (!cookie.value.startsWith("Bearer ")) return null
 
 	let valid: jose.JWTVerifyResult
 	try {
 		// get cookie without "Bearer " prefix and validate it
-		valid = await jose.jwtVerify(cookie.substring(7), JWT_SECRET)
+		valid = await jose.jwtVerify(cookie.value.substring(7), JWT_SECRET)
 	} catch {
 		return null
 	}
@@ -67,7 +69,7 @@ export async function getSessionData(
  * Save session data to the database and send it to the client as a cookie
  */
 export async function saveSessionData(
-	res: NextApiResponse,
+	cookies: ResponseCookies,
 	user: User,
 	prevSession: SessionData | null
 ): Promise<{
@@ -122,12 +124,12 @@ export async function saveSessionData(
 
 	// set the cookie in response headers
 	// the cookie should expire in (expiry timestamp - issued at timestamp) seconds as defined by the Max-Age header
-	res.setHeader(
-		"Set-Cookie",
-		`${env.COOKIE_NAME}=Bearer ${cookie}; HttpOnly; Max-Age=${
-			saved.exp - saved.iat
-		}; Path=/; Secure`
-	)
+	cookies.set(env.COOKIE_NAME, `Bearer ${cookie}`, {
+		httpOnly: true,
+		maxAge: saved.exp - saved.iat,
+		path: "/",
+		secure: true,
+	})
 
 	return {
 		cookie: `Bearer ${cookie}`,
@@ -139,22 +141,24 @@ export async function saveSessionData(
  * Expire session data
  */
 export async function clearSessionData(
-	req: NextApiRequest,
-	res: NextApiResponse
+	requestCookies: RequestCookies,
+	responseCookies: ResponseCookies
 ) {
 	// first we delete the cookie
-	res.setHeader(
-		"Set-Cookie",
-		`${env.COOKIE_NAME}=1; HttpOnly; Max-Age=1; Path=/; Secure`
-	)
+	responseCookies.set(env.COOKIE_NAME, "", {
+		httpOnly: true,
+		maxAge: 1,
+		path: "/",
+		secure: true,
+	})
 
 	// next we need to delete the session data from the database
-	const cookie = req.cookies[env.COOKIE_NAME]
+	const cookie = requestCookies.get(env.COOKIE_NAME)
 	if (!cookie) return
 	let valid: jose.JWTVerifyResult
 	try {
 		// get cookie without "Bearer " prefix and validate it
-		valid = await jose.jwtVerify(cookie.substring(7), JWT_SECRET)
+		valid = await jose.jwtVerify(cookie.value.substring(7), JWT_SECRET)
 	} catch {
 		return null
 	}
