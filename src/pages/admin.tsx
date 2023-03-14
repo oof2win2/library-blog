@@ -2,7 +2,7 @@ import { UserAuthLevel } from "@/utils/types"
 import {
 	EditAdminUser,
 	EditAllowedDomain,
-	// EditBook,
+	EditBook,
 } from "@/utils/validators/UserForms"
 import {
 	Heading,
@@ -55,6 +55,9 @@ export default function Admin() {
 		api.user.removeAllowedDomain.useMutation()
 	const [domainToRemove, setDomainToRemove] = useState("")
 	const removeDomainCancelRef = useRef<HTMLButtonElement>(null)
+
+	const addBookMutation = api.books.addBook.useMutation()
+	const removeBookMutation = api.books.removeBook.useMutation()
 
 	useEffect(() => {
 		if (!user || user.authLevel !== UserAuthLevel.Admin) {
@@ -119,6 +122,33 @@ export default function Admin() {
 				description: removeAllowedDomainMutation.error?.message,
 			})
 	}, [removeAllowedDomainMutation.status])
+
+	useEffect(() => {
+		if (addBookMutation.status === "success") {
+			toast({
+				title: "Book added",
+				status: "success",
+			})
+		} else if (addBookMutation.status === "error")
+			toast({
+				title: "Error adding book",
+				status: "error",
+				description: addBookMutation.error?.message,
+			})
+	}, [addBookMutation.status])
+	useEffect(() => {
+		if (removeBookMutation.status === "success") {
+			toast({
+				title: "Book removed",
+				status: "success",
+			})
+		} else if (removeBookMutation.status === "error")
+			toast({
+				title: "Error removing book",
+				status: "error",
+				description: removeBookMutation.error?.message,
+			})
+	}, [removeBookMutation.status])
 
 	return (
 		<Container maxW="80ch">
@@ -320,6 +350,64 @@ export default function Admin() {
 							/>
 							<FormErrorMessage>
 								{props.errors.domain}
+							</FormErrorMessage>
+						</FormControl>
+						<Button type="submit">Submit</Button>
+					</form>
+				)}
+			</Formik>
+
+			<Divider m={4} />
+
+			<Heading>Add books</Heading>
+			<Formik
+				initialValues={{ isbn: "" }}
+				validationSchema={toFormikValidationSchema(EditBook)}
+				onSubmit={(values) => addBookMutation.mutate(values.isbn)}
+			>
+				{(props) => (
+					<form onSubmit={props.handleSubmit}>
+						<FormControl
+							isRequired
+							isInvalid={Boolean(props.errors.isbn)}
+						>
+							<FormLabel>ISBN of the book</FormLabel>
+							<Input
+								onChange={props.handleChange}
+								onBlur={props.handleBlur}
+								name="isbn"
+								placeholder="9781442414495"
+							/>
+							<FormErrorMessage>
+								{props.errors.isbn}
+							</FormErrorMessage>
+						</FormControl>
+						<Button type="submit">Submit</Button>
+					</form>
+				)}
+			</Formik>
+
+			<Heading>Remove books</Heading>
+			<Formik
+				initialValues={{ isbn: "" }}
+				validationSchema={toFormikValidationSchema(EditBook)}
+				onSubmit={(values) => removeBookMutation.mutate(values.isbn)}
+			>
+				{(props) => (
+					<form onSubmit={props.handleSubmit}>
+						<FormControl
+							isRequired
+							isInvalid={Boolean(props.errors.isbn)}
+						>
+							<FormLabel>ISBN of the book</FormLabel>
+							<Input
+								onChange={props.handleChange}
+								onBlur={props.handleBlur}
+								name="isbn"
+								placeholder="9781442414495"
+							/>
+							<FormErrorMessage>
+								{props.errors.isbn}
 							</FormErrorMessage>
 						</FormControl>
 						<Button type="submit">Submit</Button>

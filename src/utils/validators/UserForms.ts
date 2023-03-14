@@ -46,3 +46,8 @@ export const EditAllowedDomain = z.object({
 	domain: z.string(),
 })
 export type EditAllowedDomainType = z.infer<typeof EditAllowedDomain>
+
+export const EditBook = z.object({
+	isbn: z.string(),
+})
+export type EditBookType = z.infer<typeof EditBook>
