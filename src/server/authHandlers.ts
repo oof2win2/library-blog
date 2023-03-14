@@ -5,7 +5,7 @@ import { env } from "@/env.mjs"
 import { Session, User } from "@prisma/client"
 import { prisma } from "@/server/db"
 
-const JWT_SECRET = Buffer.from(env.JWT_SECRET)
+const JWT_SECRET = new TextEncoder().encode(env.JWT_SECRET)
 
 /**
  * Get session
