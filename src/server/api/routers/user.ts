@@ -8,8 +8,6 @@ import { UserAuthLevel } from "@/utils/types"
 import bcrypt from "bcryptjs"
 import { TRPCError } from "@trpc/server"
 import { clearSessionData, saveSessionData } from "@/server/authHandlers"
-// @ts-expect-error
-import cryptoRandomString from "crypto-random-string/browser"
 import { sendPasswordReset, sendVerificationEmail } from "@/server/mail"
 
 const userRouter = createTRPCRouter({
@@ -81,7 +79,8 @@ const userRouter = createTRPCRouter({
 					message: "This email domain is not allowed",
 				})
 
-			const verificationToken = cryptoRandomString({ length: 64 })
+			// we hash the email to create the token, as it will be unique (bcrypt smart)
+			const verificationToken = bcrypt.hashSync(input.email)
 			const user = await ctx.prisma.user.create({
 				data: {
 					email: input.email,
@@ -146,7 +145,8 @@ const userRouter = createTRPCRouter({
 			// if there isnt a user, we send a success message to prevent email enumeration
 			if (!foundUser) return
 
-			const passwordResetToken = cryptoRandomString({ length: 64 })
+			// we hash the email to create the token, as it will be unique (bcrypt smart)
+			const passwordResetToken = bcrypt.hashSync(input)
 			const user = await ctx.prisma.user.update({
 				where: {
 					email: input,
