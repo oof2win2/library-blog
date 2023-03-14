@@ -23,6 +23,7 @@
 		"@trpc/react-query": "^10.9.0",
 		"@trpc/server": "^10.9.0",
 		"bcryptjs": "^2.4.3",
+		"crypto-random-string": "^5.0.0",
 		"formik": "^2.2.9",
 		"framer-motion": "^10.2.4",
 		"immer": "^9.0.19",

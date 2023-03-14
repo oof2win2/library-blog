@@ -8,7 +8,8 @@ import { UserAuthLevel } from "@/utils/types"
 import bcrypt from "bcryptjs"
 import { TRPCError } from "@trpc/server"
 import { clearSessionData, saveSessionData } from "@/server/authHandlers"
-import cryptoRandomString from "crypto-random-string"
+// @ts-expect-error
+import cryptoRandomString from "crypto-random-string/browser"
 import { sendPasswordReset, sendVerificationEmail } from "@/server/mail"
 
 const userRouter = createTRPCRouter({

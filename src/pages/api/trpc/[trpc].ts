@@ -16,3 +16,8 @@ export default createNextApiHandler({
 		}
 	},
 })
+
+export const config = {
+	runtime: "edge",
+	regions: ["fra1"],
+}
