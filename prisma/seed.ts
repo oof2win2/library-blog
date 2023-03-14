@@ -1,4 +1,4 @@
-//// <reference path="../src/types.d.ts" />
+/// <reference path="../src/types.d.ts" />
 
 import { PrismaClient } from "@prisma/client"
 import fs from "fs/promises"
@@ -32,7 +32,7 @@ const run = async () => {
 				name: faker.name.fullName(),
 				email: faker.internet.email(),
 				password: bcrypt.hashSync(
-					userPasswords[i % userPasswords.length]
+					userPasswords[i % userPasswords.length]!
 				),
 			},
 		})

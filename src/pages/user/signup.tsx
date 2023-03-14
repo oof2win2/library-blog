@@ -30,7 +30,7 @@ export default function SignUp() {
 			name: "",
 		},
 		validationSchema: toFormikValidationSchema(SignupForm),
-		onSubmit: async ({ email, password, name }) =>
+		onSubmit: ({ email, password, name }) =>
 			signupMutation.mutate({ email, password, name }),
 	})
 	const debouncedSetFieldValue = useDebouncedCallback(

@@ -17,7 +17,7 @@ export async function sendVerificationEmail(user: User, token: string) {
 	})
 }
 
-export async function notifyNewReview(
+export function notifyNewReview(
 	book: Book,
 	review: Review,
 	user: User,

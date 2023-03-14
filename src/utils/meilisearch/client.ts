@@ -15,13 +15,13 @@ export let meiliSearchClient: MeiliSearch
 
 if (IS_PROD) {
 	meiliSearchClient = new MeiliSearch({
-		host: env.NEXT_PUBLIC_MEILISEARCH_URL as string,
+		host: env.NEXT_PUBLIC_MEILISEARCH_URL,
 		apiKey: env.NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY,
 	})
 } else {
 	if (!global.__globalMeili__) {
 		global.__globalMeili__ = new MeiliSearch({
-			host: env.NEXT_PUBLIC_MEILISEARCH_URL as string,
+			host: env.NEXT_PUBLIC_MEILISEARCH_URL,
 			apiKey: env.NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY,
 		})
 	}

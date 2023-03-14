@@ -7,7 +7,7 @@ import { useUserStore } from "@/utils/zustand"
 export default function SignUp() {
 	const toast = useToast()
 	const router = useRouter()
-	const { login } = useUserStore()
+	const login = useUserStore((store) => store.login)
 	const verifyMutation = api.user.verify.useMutation()
 
 	useEffect(() => {
