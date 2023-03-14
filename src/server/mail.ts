@@ -5,9 +5,12 @@ import { env } from "@/env.mjs"
 sendgrid.setApiKey(env.SENDGRID_API_KEY)
 
 export async function sendVerificationEmail(user: User, token: string) {
+	const qs = new URLSearchParams()
+	// auto URL encode the bcrypt hashed token
+	qs.append("token", token)
 	const verificationLink = `${
 		process.env.VERCEL_URL ? "https://" : "http://"
-	}${process.env.VERCEL_URL || "localhost:3000"}/user/verify?token=${token}`
+	}${process.env.VERCEL_URL || "localhost:3000"}/user/verify?${qs}`
 
 	await sendgrid.send({
 		to: user.email,
@@ -37,9 +40,12 @@ export function notifyNewReview(
 }
 
 export async function sendPasswordReset(user: User, token: string) {
+	const qs = new URLSearchParams()
+	// auto URL encode the bcrypt hashed token
+	qs.append("token", token)
 	const resetLink = `${process.env.VERCEL_URL ? "https://" : "http://"}${
 		process.env.VERCEL_URL || "localhost:3000"
-	}/user/passwordreset/new?token=${token}`
+	}/user/passwordreset/new?${qs}`
 	await sendgrid.send({
 		to: user.email,
 		from: env.EMAIL_USERNAME,
