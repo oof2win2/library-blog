@@ -1,16 +1,12 @@
-import * as trpc from "@trpc/server"
 import { inferAsyncReturnType } from "@trpc/server"
 import * as trpcNext from "@trpc/server/adapters/next"
 import { getSessionData } from "../authHandlers"
 import { prisma } from "@/server/db"
+import { NextFetchEvent, NextRequest } from "next/server"
+import { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies"
 
-export async function createContext({
-	req,
-	res,
-}: trpcNext.CreateNextContextOptions) {
-	// Create your context based on the request object
-	// Will be available as `ctx` in all your resolvers
-
+// custom context, available as .ctx on all requests
+export async function createContext(req: NextRequest, ctx: NextFetchEvent) {
 	const sessionData = await getSessionData(req.cookies)
 	const user = sessionData?.user ?? null
 
@@ -18,7 +14,8 @@ export async function createContext({
 		user,
 		prisma,
 		req,
-		res,
+		baseCtx: ctx,
+		responseCookies: new ResponseCookies(new Headers()),
 	}
 }
 export type Context = inferAsyncReturnType<typeof createContext>

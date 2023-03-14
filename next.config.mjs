@@ -17,10 +17,5 @@ const config = {
       }
     ]
   },
-
-  webpack: (config) => {
-	config.experiments.topLevelAwait = true;
-	return config;
-  }
 };
 export default config;

@@ -8,14 +8,14 @@ import { UserAuthLevel } from "@/utils/types"
 import { TRPCError } from "@trpc/server"
 import { clearSessionData, saveSessionData } from "@/server/authHandlers"
 import { sendPasswordReset, sendVerificationEmail } from "@/server/mail"
-let bcrypt: typeof import("bcryptjs")
+let bcrypt: Promise<typeof import("bcryptjs")> = new Promise(() => {})
 // @ts-expect-error - we are running in a vercel edge function
 if (typeof EdgeRuntime === "string") {
 	// we are running in a vercel edge function
 	// @ts-expect-error stupid import error
-	bcrypt = await import("bcryptjs/dist/bcrypt")
+	bcrypt = import("bcryptjs/dist/bcrypt")
 } else {
-	bcrypt = await import("bcryptjs")
+	bcrypt = import("bcryptjs")
 }
 
 const userRouter = createTRPCRouter({
@@ -38,21 +38,21 @@ const userRouter = createTRPCRouter({
 					message: "Invalid email or password",
 				})
 
-			if (!bcrypt.compareSync(input.password, user.password)) {
+			if (!(await bcrypt).compareSync(input.password, user.password)) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
 					message: "Invalid email or password",
 				})
 			}
 
-			await saveSessionData(ctx.res, user, null)
+			await saveSessionData(ctx.responseCookies, user, null)
 
 			return {
 				user,
 			}
 		}),
 	logout: publicProcedure.mutation(async ({ ctx }) => {
-		await clearSessionData(ctx.req, ctx.res)
+		await clearSessionData(ctx.req.cookies, ctx.responseCookies)
 	}),
 
 	signup: publicProcedure
@@ -88,11 +88,11 @@ const userRouter = createTRPCRouter({
 				})
 
 			// we hash the email to create the token, as it will be unique (bcrypt smart)
-			const verificationToken = bcrypt.hashSync(input.email)
+			const verificationToken = (await bcrypt).hashSync(input.email)
 			const user = await ctx.prisma.user.create({
 				data: {
 					email: input.email,
-					password: await bcrypt.hash(input.password, 10),
+					password: (await bcrypt).hashSync(input.password),
 					name: input.name,
 					userVerification: {
 						create: {
@@ -136,7 +136,11 @@ const userRouter = createTRPCRouter({
 				},
 			})
 
-			await saveSessionData(ctx.res, userVerification.User, null)
+			await saveSessionData(
+				ctx.responseCookies,
+				userVerification.User,
+				null
+			)
 
 			return userVerification.User
 		}),
@@ -154,7 +158,7 @@ const userRouter = createTRPCRouter({
 			if (!foundUser) return
 
 			// we hash the email to create the token, as it will be unique (bcrypt smart)
-			const passwordResetToken = bcrypt.hashSync(input)
+			const passwordResetToken = (await bcrypt).hashSync(input)
 			const user = await ctx.prisma.user.update({
 				where: {
 					email: input,
@@ -201,14 +205,14 @@ const userRouter = createTRPCRouter({
 					id: foundPasswordReset.userId,
 				},
 				data: {
-					password: bcrypt.hashSync(input.password),
+					password: (await bcrypt).hashSync(input.password),
 					passwordReset: {
 						delete: true,
 					},
 				},
 			})
 
-			await saveSessionData(ctx.res, user, null)
+			await saveSessionData(ctx.responseCookies, user, null)
 
 			return user
 		}),
