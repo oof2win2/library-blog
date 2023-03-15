@@ -59,11 +59,6 @@ const LoggedOut: Page[] = [
 const LoggedIn: Page[] = [
 	{
 		type: "page",
-		title: "Profile",
-		href: "/user/profile",
-	},
-	{
-		type: "page",
 		title: "Logout",
 		href: "/user/logout",
 	},
