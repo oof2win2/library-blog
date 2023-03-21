@@ -51,6 +51,16 @@ export default function SignUp() {
 				</Center>
 			</Container>
 		)
+	} else if (verifyMutation.status === "error") {
+		return (
+			<Container maxW="60ch">
+				<Center flexDir="column">
+					<Heading m={5}>Signup</Heading>
+					<Text>There was an error verifying your email.</Text>
+					<Text>{verifyMutation.error?.message}</Text>
+				</Center>
+			</Container>
+		)
 	}
 
 	return (

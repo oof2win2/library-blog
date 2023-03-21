@@ -1,6 +1,13 @@
 import { Book, Review, User } from "@prisma/client"
 import { env } from "@/env.mjs"
 
+const BASE_URL =
+	process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
+		? "https://library.parklane-is.com"
+		: `${process.env.VERCEL_URL ? "https://" : "http://"}${
+				process.env.VERCEL_URL || "localhost:3000"
+		  }`
+
 const sendMail = async (to: string, subject: string, text: string) => {
 	await fetch("https://api.sendgrid.com/v3/mail/send", {
 		method: "POST",
@@ -37,9 +44,7 @@ export async function sendVerificationEmail(user: User, token: string) {
 	const qs = new URLSearchParams()
 	// auto URL encode the bcrypt hashed token
 	qs.append("token", token)
-	const verificationLink = `${
-		process.env.VERCEL_URL ? "https://" : "http://"
-	}${process.env.VERCEL_URL || "localhost:3000"}/user/verify?${qs}`
+	const verificationLink = `${BASE_URL}/user/verify?${qs}`
 
 	await sendMail(
 		user.email,
@@ -68,9 +73,7 @@ export async function sendPasswordReset(user: User, token: string) {
 	const qs = new URLSearchParams()
 	// auto URL encode the bcrypt hashed token
 	qs.append("token", token)
-	const resetLink = `${process.env.VERCEL_URL ? "https://" : "http://"}${
-		process.env.VERCEL_URL || "localhost:3000"
-	}/user/passwordreset/new?${qs}`
+	const resetLink = `${BASE_URL}/user/passwordreset/new?${qs}`
 	const text = `Hello ${user.name},\n\nPlease reset your password by clicking the following link:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.\n\nRegards,\nBookaholic Blurbs`
 	sendMail(user.email, "Bookaholic Blurbs: Reset your password", text)
 }
