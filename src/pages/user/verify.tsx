@@ -14,7 +14,7 @@ export default function SignUp() {
 		if (router.query.token) {
 			verifyMutation.mutate(router.query.token as string)
 		}
-	}, [])
+	}, [router.query.token])
 
 	useEffect(() => {
 		if (verifyMutation.status === "success") {
