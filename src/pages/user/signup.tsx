@@ -53,7 +53,7 @@ export default function SignUp() {
 					<Heading m={5}>Signup</Heading>
 					<Text>
 						Please check your email and verify it by clicking on the
-						link
+						link. Please check your spam folder as well
 					</Text>
 				</Center>
 			</Container>
