@@ -23,6 +23,13 @@ model Book {
     reviews        Review[]
 }
 
+// for keepalive purposes
+model BookCount {
+    id    Int      @id @default(autoincrement())
+    count Int      @default(0)
+    date  DateTime @unique
+}
+
 model Review {
     id              Int     @id @default(autoincrement())
     isbn            String  @db.Char(13) // must be stored as varchar, as int is too small
