@@ -1,5 +1,4 @@
 import { inferAsyncReturnType } from "@trpc/server"
-import * as trpcNext from "@trpc/server/adapters/next"
 import { getSessionData } from "../authHandlers"
 import { prisma } from "@/server/db"
 import { NextFetchEvent, NextRequest } from "next/server"

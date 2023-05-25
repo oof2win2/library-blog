@@ -3,6 +3,7 @@ import { createTRPCRouter, publicProcedure } from "@/server/api/trpc"
 import { userProtectedProcedure } from "@/server/api/auth"
 import { UserAuthLevel } from "@/utils/types"
 import { notifyNewReview } from "@/server/mail"
+import { CreateReviewForm } from "../validators/reviews"
 
 const reviewRouter = createTRPCRouter({
 	getBookReviewData: publicProcedure
@@ -48,19 +49,7 @@ const reviewRouter = createTRPCRouter({
 		}),
 
 	createReview: userProtectedProcedure
-		.input(
-			z.object({
-				isbn: z.string().length(13),
-				reviewText: z.string().min(1),
-				rating: z.number().min(1).max(5),
-				threeWords: z
-					.string()
-					.refine(
-						(v) => v.split(" ").length === 3,
-						"Must be three words"
-					),
-			})
-		)
+		.input(CreateReviewForm)
 		.mutation(async ({ ctx, input }) => {
 			const reviewAuthorId = ctx.user.id
 			const review = await ctx.prisma.review.create({
