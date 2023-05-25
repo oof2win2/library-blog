@@ -13,5 +13,19 @@ export default async function handler(
 			date: new Date(),
 		},
 	})
+	await prisma.passwordReset.deleteMany({
+		where: {
+			expiresAt: {
+				lte: new Date(),
+			},
+		},
+	})
+	await prisma.userVerification.deleteMany({
+		where: {
+			expiresAt: {
+				lte: new Date(),
+			},
+		},
+	})
 	res.status(200).json({ status: "success", message: "Keep alive succeeded" })
 }
