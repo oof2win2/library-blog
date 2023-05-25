@@ -159,6 +159,12 @@ const userRouter = createTRPCRouter({
 
 			// we hash the email to create the token, as it will be unique (bcrypt smart)
 			const passwordResetToken = (await bcrypt).hashSync(input)
+			// first delete any old password resets
+			await ctx.prisma.passwordReset.deleteMany({
+				where: {
+					email: input,
+				},
+			})
 			const user = await ctx.prisma.user.update({
 				where: {
 					email: input,
